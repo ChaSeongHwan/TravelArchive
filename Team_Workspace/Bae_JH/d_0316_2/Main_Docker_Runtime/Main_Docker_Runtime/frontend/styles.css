@@ -1,0 +1,961 @@
+* { 
+  box-sizing: border-box; 
+}
+
+html, body { 
+  margin: 0; 
+  width: 100%; 
+  height: 100%; 
+  font-family: "Pretendard", "Noto Sans KR", "Apple SD Gothic Neo", sans-serif; 
+}
+
+body { 
+  overflow: hidden; 
+  color: #111827; 
+  background: #bcd3e6; 
+  transition: background 0.5s ease; 
+}
+
+/* ==========================================================
+   1. BACKGROUND (기본 배경 씬)
+   ========================================================== */
+.bg-scene { 
+  position: fixed; 
+  inset: 0; 
+  overflow: hidden; 
+  z-index: 0; 
+}
+
+.bg-gradient {
+  position: absolute; 
+  inset: 0; 
+  transition: background 0.5s ease, opacity 0.5s ease;
+  background: radial-gradient(circle at 20% 15%, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.35) 18%, rgba(255,255,255,0) 40%),
+              radial-gradient(circle at 80% 20%, rgba(220,240,255,0.55) 0%, rgba(220,240,255,0.18) 25%, rgba(220,240,255,0) 45%),
+              linear-gradient(180deg, #dce8f3 0%, #c3d8e7 45%, #a9c3d8 100%);
+}
+
+.bg-light { 
+  position: absolute; 
+  border-radius: 999px; 
+  filter: blur(80px); 
+  opacity: 0.65; 
+  animation: floatLight 12s ease-in-out infinite; 
+  transition: opacity 0.3s ease; 
+}
+
+.light-1 { 
+  top: -80px; 
+  left: -100px; 
+  width: 360px; 
+  height: 360px; 
+  background: rgba(255,255,255,0.65); 
+}
+
+.light-2 { 
+  top: 80px; 
+  right: 40px; 
+  width: 420px; 
+  height: 420px; 
+  background: rgba(180, 225, 255, 0.40); 
+  animation-duration: 16s; 
+}
+
+.light-3 { 
+  bottom: -80px; 
+  left: 30%; 
+  width: 460px; 
+  height: 460px; 
+  background: rgba(130, 190, 235, 0.28); 
+  animation-duration: 20s; 
+}
+
+.bg-illustrations { 
+  position: absolute; 
+  inset: 0; 
+  pointer-events: none; 
+  z-index: 2; 
+  overflow: hidden; 
+  transition: opacity 0.3s ease;
+}
+
+.moving-image { 
+  position: absolute; 
+  display: block; 
+  width: auto; 
+  height: auto; 
+  max-width: none; 
+  pointer-events: none; 
+  user-select: none; 
+  filter: blur(0.3px); 
+}
+
+.img-1 { 
+  top: 10%; 
+  height: 240px; 
+  opacity: 0.34; 
+  animation: moveRightToLeft1 42s linear infinite; 
+}
+
+.img-2 { 
+  top: 42%; 
+  height: 220px; 
+  opacity: 0.28; 
+  animation: moveLeftToRight 56s linear infinite; 
+}
+
+.img-3 { 
+  bottom: 8%; 
+  height: 260px; 
+  opacity: 0.24; 
+  animation: moveRightToLeft2 68s linear infinite; 
+}
+
+.mist { 
+  position: absolute; 
+  left: -10%; 
+  width: 120%; 
+  border-radius: 999px; 
+  filter: blur(50px); 
+  z-index: 3; 
+  pointer-events: none; 
+  transition: opacity 0.3s ease; 
+}
+
+.mist-1 { 
+  top: 30%; 
+  height: 120px; 
+  background: rgba(255,255,255,0.10); 
+}
+
+.mist-2 { 
+  bottom: 18%; 
+  height: 160px; 
+  background: rgba(255,255,255,0.08); 
+}
+
+/* ==========================================================
+   2. WEATHER THEME & EFFECTS (날씨 테마 전용)
+   ========================================================== */
+.weather-layer {
+  position: absolute; 
+  inset: 0; 
+  z-index: 1; 
+  pointer-events: none;
+  opacity: 0; 
+  transition: opacity 0.8s ease; 
+}
+
+body[data-theme="weather"] .weather-layer { 
+  opacity: 1; 
+}
+
+/* 날씨 모드일 때 기존 기본 배경 요소들 숨기기 */
+body[data-theme="weather"] .bg-light,
+body[data-theme="weather"] .bg-illustrations,
+body[data-theme="weather"] .mist,
+body[data-theme="weather"] .bg-gradient {
+  opacity: 0; 
+  pointer-events: none;
+}
+
+/* 날씨 테마 전용 글래스 패널 설정 (선명도 증가) */
+body[data-theme="weather"] .main-panel {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(10px); 
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* 흐린 날(Cloudy) 구름 입자 애니메이션 */
+.cloud-particle {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  filter: blur(40px);
+  animation: driftCloud linear infinite;
+  pointer-events: none;
+}
+
+/* 1. 맑음 (Clear) */
+.weather-clear {
+  background: radial-gradient(circle at 80% 20%, rgba(255, 240, 200, 0.9) 0%, rgba(135, 206, 235, 0.8) 40%, rgba(70, 130, 180, 0.9) 100%);
+}
+.weather-clear::after {
+  content: ''; 
+  position: absolute; 
+  top: -10%; 
+  right: -10%; 
+  width: 50%; 
+  height: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 60%);
+  filter: blur(40px); 
+  animation: pulseSun 6s infinite alternate;
+}
+
+/* 2. 흐림 (Cloudy) */
+.weather-cloudy { 
+  background: linear-gradient(180deg, #5b6467 0%, #8b939a 100%); 
+}
+
+/* 3. 밤 (Night) */
+.weather-night { 
+  background: linear-gradient(to bottom, #0f2027, #203a43, #2c5364); 
+}
+body[data-theme="weather"].night-mode .hero h1, 
+body[data-theme="weather"].night-mode .hero p,
+body[data-theme="weather"].night-mode .sidebar-title { 
+  color: rgba(255,255,255,0.9); 
+}
+
+/* 4. 비 (Rain) */
+.weather-rain { 
+  background: linear-gradient(180deg, #2a2a35 0%, #101014 100%); 
+}
+body[data-theme="weather"].rain-mode .hero h1, 
+body[data-theme="weather"].rain-mode .hero p,
+body[data-theme="weather"].rain-mode .sidebar-title { 
+  color: rgba(255,255,255,0.9); 
+}
+
+
+/* ==========================================================
+   3. THEME STYLES (기존 정적 테마)
+   ========================================================== */
+.theme-popup { 
+  position: absolute; 
+  bottom: 60px; 
+  left: 12px; 
+  background: rgba(255, 255, 255, 0.85); 
+  backdrop-filter: blur(12px); 
+  -webkit-backdrop-filter: blur(12px); 
+  border: 1px solid rgba(255,255,255,0.4); 
+  border-radius: 16px; 
+  padding: 10px; 
+  display: flex; 
+  flex-wrap: wrap; 
+  gap: 8px; 
+  width: 170px; 
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+  opacity: 0; 
+  pointer-events: none; 
+  transform: translateY(10px); 
+  transition: all 0.2s ease; 
+  z-index: 100; 
+}
+
+.theme-popup.show { 
+  opacity: 1; 
+  pointer-events: auto; 
+  transform: translateY(0); 
+}
+
+.theme-swatch { 
+  width: 30px; 
+  height: 30px; 
+  border-radius: 50%; 
+  border: 2px solid rgba(255,255,255,0.8); 
+  cursor: pointer; 
+  transition: transform 0.2s; 
+}
+
+.theme-swatch:hover { 
+  transform: scale(1.1); 
+  border-color: #fff; 
+}
+
+body[data-theme="dark"] { 
+  background: #111827; 
+  color: #f3f4f6; 
+}
+
+body[data-theme="dark"] .bg-gradient { 
+  background: radial-gradient(circle at 50% 50%, rgba(31,41,55,0.8) 0%, rgba(17,24,39,1) 100%); 
+}
+
+body[data-theme="dark"] .hero h1, 
+body[data-theme="dark"] .sidebar-title { 
+  color: rgba(255,255,255,0.9); 
+}
+
+body[data-theme="green"] { 
+  background: #a8d5ba; 
+}
+
+body[data-theme="green"] .bg-gradient { 
+  background: linear-gradient(180deg, #dcf0e3 0%, #a8d5ba 100%); 
+}
+
+body[data-theme^="photo"] .bg-light, 
+body[data-theme^="photo"] .bg-illustrations { 
+  display: none; 
+} 
+
+body[data-theme="photo1"] .bg-gradient { 
+  background: url('/resource/bg-long-1.png') center/cover no-repeat; 
+  opacity: 0.6; 
+}
+
+body[data-theme="photo2"] .bg-gradient { 
+  background: url('/resource/bg-long-2.png') center/cover no-repeat; 
+  opacity: 0.6; 
+}
+
+body[data-theme="photo3"] .bg-gradient { 
+  background: url('/resource/bg-long-3.png') center/cover no-repeat; 
+  opacity: 0.6; 
+}
+
+/* ==========================================================
+   4. FOREGROUND APP (레이아웃 패널)
+   ========================================================== */
+.app-shell { 
+  position: relative; 
+  z-index: 10; 
+  height: 100vh; 
+  height: 100dvh; 
+  padding: 28px; 
+}
+
+.main-panel { 
+  width: 100%; 
+  height: calc(100vh - 56px); 
+  height: calc(100dvh - 56px); 
+  display: flex; 
+  overflow: hidden; 
+  border: 1px solid rgba(255,255,255,0.34); 
+  border-radius: 32px; 
+  background: rgba(255,255,255,0.14); 
+  backdrop-filter: blur(22px); 
+  -webkit-backdrop-filter: blur(22px); 
+  box-shadow: 0 24px 80px rgba(24, 39, 75, 0.18), inset 0 1px 0 rgba(255,255,255,0.28); 
+}
+
+/* ==========================================================
+   5. SIDEBAR
+   ========================================================== */
+.sidebar { 
+  width: 280px; 
+  flex-shrink: 0; 
+  display: flex; 
+  flex-direction: column; 
+  padding: 22px 18px; 
+  border-right: 1px solid rgba(255,255,255,0.20); 
+  background: rgba(255,255,255,0.08); 
+  transition: width 0.3s ease, padding 0.3s ease, opacity 0.3s ease; 
+  overflow: hidden; 
+  white-space: nowrap; 
+}
+
+.sidebar.collapsed { 
+  width: 0; 
+  padding: 0; 
+  opacity: 0; 
+  border-right: none; 
+}
+
+.sidebar-header { 
+  padding: 0 10px; 
+  margin-bottom: 24px; 
+  position: relative; 
+}
+
+.sidebar-label { 
+  font-size: 11px; 
+  letter-spacing: 0.34em; 
+  color: rgba(31, 41, 55, 0.55); 
+  transition: color 0.2s; 
+}
+
+.sidebar-label:hover { 
+  color: rgba(17, 24, 39, 0.9); 
+  font-weight: bold; 
+}
+
+.sidebar-title { 
+  margin-top: 8px; 
+  font-size: 28px; 
+  font-weight: 700; 
+  color: rgba(17, 24, 39, 0.90); 
+}
+
+.new-chat-btn { 
+  margin-top: 16px; 
+  width: 100%; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  gap: 8px; 
+  padding: 12px; 
+  border: 1px solid rgba(255,255,255,0.4); 
+  border-radius: 16px; 
+  background: rgba(255,255,255,0.25); 
+  color: rgba(17,24,39,0.9); 
+  font-size: 14px; 
+  font-weight: 700; 
+  cursor: pointer; 
+  transition: 0.2s ease; 
+}
+
+.new-chat-btn:hover { 
+  background: rgba(255,255,255,0.45); 
+  transform: translateY(-1px); 
+}
+
+.sidebar-section-title { 
+  margin-top: 24px; 
+  margin-bottom: 12px; 
+  padding: 0 10px; 
+  font-size: 14px; 
+  font-weight: 700; 
+  color: rgba(31, 41, 55, 0.80); 
+}
+
+.sidebar-list { 
+  flex: 1; 
+  overflow-y: auto; 
+  padding-right: 4px; 
+}
+
+.sidebar-item { 
+  width: 100%; 
+  display: flex; 
+  align-items: center; 
+  gap: 12px; 
+  margin-bottom: 8px; 
+  padding: 13px 14px; 
+  border: 1px solid rgba(255,255,255,0.18); 
+  border-radius: 18px; 
+  background: rgba(255,255,255,0.16); 
+  color: rgba(17, 24, 39, 0.88); 
+  font-size: 14px; 
+  text-align: left; 
+  cursor: pointer; 
+  transition: 0.2s ease; 
+}
+
+.sidebar-item:hover { 
+  transform: translateY(-1px); 
+  background: rgba(255,255,255,0.26); 
+}
+
+.dot { 
+  width: 8px; 
+  height: 8px; 
+  flex-shrink: 0; 
+  border-radius: 999px; 
+  background: rgba(59, 130, 246, 0.8); 
+}
+
+.sidebar-footer { 
+  margin-top: 14px; 
+  padding: 12px; 
+  border-radius: 18px; 
+  border: 1px solid rgba(255,255,255,0.18); 
+  background: rgba(255,255,255,0.12); 
+  display: flex; 
+  justify-content: space-around; 
+  align-items: center; 
+}
+
+.footer-icon-btn { 
+  background: transparent; 
+  border: none; 
+  color: rgba(31, 41, 55, 0.7); 
+  cursor: pointer; 
+  padding: 8px; 
+  border-radius: 12px; 
+  transition: 0.2s ease; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+}
+
+.footer-icon-btn:hover { 
+  background: rgba(255, 255, 255, 0.3); 
+  color: rgba(17, 24, 39, 0.95); 
+  transform: translateY(-2px); 
+}
+
+/* ==========================================================
+   6. MAIN CONTENT
+   ========================================================== */
+.content { 
+  flex: 1; 
+  min-width: 0; 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  position: relative; 
+  padding: 0; 
+}
+
+.top-bar { 
+  width: 100%; 
+  padding: 20px 30px; 
+  display: flex; 
+  justify-content: flex-start; 
+  flex-shrink: 0; 
+}
+
+.menu-btn { 
+  background: transparent; 
+  border: none; 
+  cursor: pointer; 
+  color: rgba(17, 24, 39, 0.7); 
+  padding: 8px; 
+  border-radius: 8px; 
+  transition: background 0.2s, color 0.2s; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+}
+
+.menu-btn:hover { 
+  background: rgba(255, 255, 255, 0.3); 
+  color: rgba(17, 24, 39, 1); 
+}
+
+/* 대문 영역 */
+.hero { 
+  max-width: 920px; 
+  text-align: center; 
+  flex: 1; 
+  display: flex; 
+  flex-direction: column; 
+  justify-content: center; 
+  margin-bottom: 120px; 
+}
+
+.hero-label { 
+  margin-bottom: 12px; 
+  font-size: 12px; 
+  letter-spacing: 0.42em; 
+  color: rgba(31, 41, 55, 0.45); 
+}
+
+.hero h1 { 
+  margin: 0; 
+  font-size: 62px; 
+  line-height: 1.08; 
+  letter-spacing: -0.04em; 
+  color: rgba(17, 24, 39, 0.92); 
+}
+
+.hero p { 
+  max-width: 760px; 
+  margin: 24px auto 0; 
+  font-size: 19px; 
+  line-height: 1.8; 
+  color: rgba(31, 41, 55, 0.76); 
+}
+
+/* 일반 페이지 (설정/계정/도움말) 섹션 */
+.page-section { 
+  display: none; 
+  width: 100%; 
+  max-width: 860px; 
+  flex: 1; 
+  padding: 40px 20px; 
+  flex-direction: column; 
+  justify-content: center; 
+  align-items: center; 
+  text-align: center; 
+  animation: messageFadeIn 0.3s ease-out forwards; 
+}
+
+.page-section h2 { 
+  font-size: 36px; 
+  margin-bottom: 20px; 
+  color: rgba(17, 24, 39, 0.9); 
+}
+
+.page-section p { 
+  font-size: 18px; 
+  color: rgba(31, 41, 55, 0.8); 
+  line-height: 1.6; 
+}
+
+body[data-theme="dark"] .page-section h2 { 
+  color: rgba(255,255,255,0.95); 
+}
+
+body[data-theme="dark"] .page-section p { 
+  color: rgba(255,255,255,0.75); 
+}
+
+/* ==========================================================
+   7. CHATTING UI (스크롤바 포함)
+   ========================================================== */
+.chat-history { 
+  display: none; 
+  width: 100%; 
+  max-width: 860px; 
+  flex: 1; 
+  overflow-y: auto; 
+  padding: 0 20px; 
+  flex-direction: column; 
+  gap: 24px; 
+  margin-bottom: 20px; 
+}
+
+/* 커스텀 스크롤바 */
+.sidebar-list::-webkit-scrollbar, 
+.chat-history::-webkit-scrollbar, 
+.chat-box textarea::-webkit-scrollbar { 
+  width: 6px; 
+  height: 6px; 
+}
+
+.sidebar-list::-webkit-scrollbar-track, 
+.chat-history::-webkit-scrollbar-track, 
+.chat-box textarea::-webkit-scrollbar-track { 
+  background-color: transparent; 
+}
+
+.sidebar-list::-webkit-scrollbar-thumb, 
+.chat-history::-webkit-scrollbar-thumb, 
+.chat-box textarea::-webkit-scrollbar-thumb { 
+  background-color: rgba(255, 255, 255, 0); 
+  border-radius: 10px; 
+}
+
+.sidebar-list:hover::-webkit-scrollbar-thumb, 
+.chat-history:hover::-webkit-scrollbar-thumb, 
+.chat-box textarea:hover::-webkit-scrollbar-thumb { 
+  background-color: rgba(255, 255, 255, 0.4); 
+}
+
+/* 스크롤바 다크모드 대응 */
+body[data-theme="dark"] .sidebar-list:hover::-webkit-scrollbar-thumb,
+body[data-theme="dark"] .chat-history:hover::-webkit-scrollbar-thumb,
+body[data-theme="dark"] .chat-box textarea:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
+body[data-theme="dark"] .sidebar-list::-webkit-scrollbar-thumb:active,
+body[data-theme="dark"] .chat-history::-webkit-scrollbar-thumb:active,
+body[data-theme="dark"] .chat-box textarea::-webkit-scrollbar-thumb:active {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.message-row { 
+  display: flex; 
+  flex-direction: column; 
+  animation: messageFadeIn 0.3s ease-out forwards; 
+  flex-shrink: 0; 
+}
+
+.message-row.user { 
+  align-items: flex-end; 
+}
+
+.message-row.bot { 
+  align-items: flex-start; 
+}
+
+.message { 
+  max-width: 75%; 
+  padding: 16px 22px; 
+  border-radius: 24px; 
+  font-size: 15px; 
+  line-height: 1.6; 
+  word-wrap: break-word; 
+  white-space: pre-wrap; 
+}
+
+.message.user { 
+  background: rgba(17, 24, 39, 0.85); 
+  color: #ffffff; 
+  border-bottom-right-radius: 6px; 
+}
+
+.message.bot { 
+  background: rgba(255, 255, 255, 0.4); 
+  backdrop-filter: blur(12px); 
+  -webkit-backdrop-filter: blur(12px); 
+  border: 1px solid rgba(255, 255, 255, 0.5); 
+  color: #111827; 
+  border-bottom-left-radius: 6px; 
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05); 
+}
+
+.message-actions { 
+  display: flex; 
+  gap: 8px; 
+  margin-top: 6px; 
+  padding: 0 12px; 
+}
+
+.action-btn { 
+  background: transparent; 
+  border: none; 
+  color: rgba(55, 65, 81, 0.6); 
+  cursor: pointer; 
+  padding: 6px; 
+  border-radius: 8px; 
+  transition: 0.2s ease; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+}
+
+.action-btn:hover { 
+  background: rgba(255, 255, 255, 0.4); 
+  color: rgba(17, 24, 39, 0.9); 
+}
+
+.loading-dots { 
+  display: flex; 
+  gap: 4px; 
+  padding: 8px 4px; 
+}
+
+.loading-dots span { 
+  width: 6px; 
+  height: 6px; 
+  background-color: rgba(17, 24, 39, 0.5); 
+  border-radius: 50%; 
+  animation: bounce 1.4s infinite ease-in-out both; 
+}
+
+.loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+.loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+.chat-wrap { 
+  display: none; 
+  width: 100%; 
+  max-width: 860px; 
+  padding: 0 20px 30px 20px; 
+  flex-shrink: 0; 
+}
+
+.chat-box { 
+  display: flex; 
+  align-items: flex-end; 
+  gap: 12px; 
+  padding: 12px; 
+  border-radius: 28px; 
+  border: 1px solid rgba(255,255,255,0.28); 
+  background: rgba(255,255,255,0.18); 
+  backdrop-filter: blur(18px); 
+  -webkit-backdrop-filter: blur(18px); 
+  box-shadow: 0 16px 48px rgba(24, 39, 75, 0.10); 
+  transition: all 0.3s ease; 
+}
+
+.expand-btn { 
+  background: transparent; 
+  border: none; 
+  color: rgba(55, 65, 81, 0.6); 
+  cursor: pointer; 
+  padding: 10px; 
+  border-radius: 12px; 
+  transition: 0.2s ease; 
+  margin-bottom: 2px; 
+}
+
+.expand-btn:hover { 
+  background: rgba(255, 255, 255, 0.3); 
+  color: rgba(17, 24, 39, 0.95); 
+}
+
+.chat-box textarea { 
+  flex: 1; 
+  min-height: 54px; 
+  max-height: 200px; 
+  padding: 16px 12px; 
+  border: 1px solid transparent; 
+  border-radius: 20px; 
+  outline: none; 
+  background: rgba(255,255,255,0.22); 
+  color: rgba(17, 24, 39, 0.95); 
+  font-size: 16px; 
+  font-family: inherit; 
+  resize: none; 
+  overflow-y: hidden; 
+  line-height: 1.4; 
+  transition: background 0.2s ease; 
+}
+
+.chat-box textarea::placeholder { 
+  color: rgba(55, 65, 81, 0.66); 
+}
+
+.chat-box textarea:focus { 
+  background: rgba(255,255,255,0.4); 
+  border-color: rgba(255,255,255,0.5); 
+}
+
+.chat-box.expanded textarea { 
+  min-height: 150px; 
+  overflow-y: auto; 
+}
+
+.chat-box button#sendBtn { 
+  height: 54px; 
+  padding: 0 20px; 
+  border: 1px solid rgba(255,255,255,0.24); 
+  border-radius: 18px; 
+  background: rgba(255,255,255,0.34); 
+  color: rgba(17, 24, 39, 0.90); 
+  font-size: 14px; 
+  font-weight: 700; 
+  cursor: pointer; 
+  transition: 0.2s ease; 
+  margin-bottom: 0px; 
+}
+
+.chat-box button#sendBtn:hover { 
+  transform: translateY(-1px); 
+  background: rgba(255,255,255,0.50); 
+}
+
+/* ==========================================================
+   8. KEYFRAMES
+   ========================================================== */
+@keyframes floatLight { 
+  0%, 100% { transform: translateY(0px); } 
+  50% { transform: translateY(-14px); } 
+}
+@keyframes moveRightToLeft1 { 
+  0% { transform: translateX(110vw); } 
+  100% { transform: translateX(-140%); } 
+}
+@keyframes moveRightToLeft2 { 
+  0% { transform: translateX(120vw); } 
+  100% { transform: translateX(-150%); } 
+}
+@keyframes moveLeftToRight { 
+  0% { transform: translateX(-140%); } 
+  100% { transform: translateX(110vw); } 
+}
+@keyframes messageFadeIn { 
+  from { opacity: 0; transform: translateY(10px); } 
+  to { opacity: 1; transform: translateY(0); } 
+}
+@keyframes bounce { 
+  0%, 80%, 100% { transform: scale(0); } 
+  40% { transform: scale(1); } 
+}
+@keyframes driftCloud {
+  0% { transform: translateX(-300px); }
+  100% { transform: translateX(110vw); }
+}
+
+/* ==========================================================
+   9. MEDIA QUERIES (반응형)
+   ========================================================== */
+.sidebar-overlay { 
+  display: none; 
+  position: absolute; 
+  inset: 0; 
+  z-index: 40; 
+  background: rgba(0, 0, 0, 0.35); 
+  backdrop-filter: blur(2px); 
+  -webkit-backdrop-filter: blur(2px); 
+  border-radius: inherit; 
+  opacity: 0; 
+  transition: opacity 0.3s ease; 
+}
+
+.sidebar-overlay.show { 
+  opacity: 1; 
+}
+
+@media (max-width: 1024px) {
+  .app-shell { padding: 18px; }
+  .main-panel { border-radius: 24px; height: calc(100vh - 36px); height: calc(100dvh - 36px); }
+  .sidebar { width: 240px; padding: 18px 14px; }
+  .sidebar-title { font-size: 24px; }
+  .hero h1 { font-size: 48px; }
+  .hero p { font-size: 17px; }
+  .page-section h2 { font-size: 30px; }
+  .page-section p { font-size: 16px; }
+  .top-bar { padding: 16px 22px; }
+}
+
+@media (max-width: 768px) {
+  .app-shell { padding: 10px; }
+  .main-panel { border-radius: 20px; height: calc(100vh - 20px); height: calc(100dvh - 20px); position: relative; }
+  
+  .light-1 { width: 220px; height: 220px; } 
+  .light-2 { width: 260px; height: 260px; } 
+  .light-3 { width: 280px; height: 280px; }
+  
+  .img-1 { height: 160px; } 
+  .img-2 { height: 140px; } 
+  .img-3 { height: 160px; }
+  
+  .sidebar { 
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    height: 100%; 
+    width: 0; 
+    padding: 0; 
+    opacity: 0; 
+    z-index: 50; 
+    border-right: none; 
+    border-radius: 20px 0 0 20px; 
+    background: rgba(255, 255, 255, 0.82); 
+    backdrop-filter: blur(24px); 
+    -webkit-backdrop-filter: blur(24px); 
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.12); 
+    white-space: nowrap; 
+    overflow: hidden; 
+    transition: width 0.32s cubic-bezier(0.4, 0, 0.2, 1), padding 0.32s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.28s ease; 
+  }
+  
+  .sidebar.open { width: 280px; padding: 22px 18px; opacity: 1; }
+  .sidebar.collapsed { width: 0; padding: 0; opacity: 0; border-right: none; }
+  .sidebar-overlay { display: block; }
+  
+  .top-bar { padding: 12px 16px; }
+  .hero { margin-bottom: 80px; padding: 0 16px; }
+  .hero h1 { font-size: 36px; letter-spacing: -0.03em; }
+  .hero p { font-size: 15px; line-height: 1.7; margin-top: 16px; }
+  .hero-label { font-size: 11px; letter-spacing: 0.3em; }
+  
+  .page-section { padding: 28px 16px; }
+  .page-section h2 { font-size: 26px; }
+  .page-section p { font-size: 15px; }
+  
+  .chat-history { padding: 0 12px; gap: 16px; }
+  .message { max-width: 88%; padding: 13px 16px; font-size: 14px; }
+  
+  .chat-wrap { padding: 0 10px calc(16px + env(safe-area-inset-bottom)) 10px; }
+  .chat-box { gap: 8px; padding: 8px; border-radius: 22px; }
+  .chat-box textarea { min-height: 46px; padding: 12px 10px; font-size: 15px; border-radius: 16px; }
+  .chat-box button#sendBtn { height: 46px; padding: 0 16px; font-size: 13px; border-radius: 14px; }
+  .chat-box.expanded textarea { min-height: 120px; }
+  
+  .theme-popup { left: 50%; transform: translateX(-50%) translateY(10px); bottom: 70px; }
+  .theme-popup.show { transform: translateX(-50%) translateY(0); }
+  
+  body[data-theme="dark"] .sidebar { background: rgba(17,24,39,1); }
+}
+
+@media (max-width: 480px) {
+  .app-shell { padding: 6px; }
+  .main-panel { border-radius: 16px; height: calc(100vh - 12px); height: calc(100dvh - 12px); }
+  .hero h1 { font-size: 28px; }
+  .hero p { font-size: 14px; }
+  .message { max-width: 94%; padding: 11px 14px; font-size: 13px; }
+  .chat-box { border-radius: 18px; padding: 7px; }
+  .chat-box textarea { font-size: 14px; padding: 10px 8px; min-height: 42px; }
+  .chat-box button#sendBtn { height: 42px; padding: 0 13px; font-size: 12px; border-radius: 12px; }
+  .expand-btn { display: none; }
+  .sidebar.open { width: 100%; border-radius: 0; }
+}
+
+@media (max-width: 896px) and (orientation: landscape) {
+  .app-shell { padding: 8px; }
+  .main-panel { height: calc(100vh - 16px); height: calc(100dvh - 16px); border-radius: 18px; }
+  .hero { margin-bottom: 60px; }
+  .hero h1 { font-size: 32px; }
+  .hero p { font-size: 14px; margin-top: 10px; }
+  .chat-wrap { padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
+  .chat-box textarea { min-height: 42px; }
+  .chat-box button#sendBtn { height: 42px; }
+}
