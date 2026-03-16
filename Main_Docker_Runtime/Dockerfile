@@ -1,6 +1,11 @@
-FROM nginx:alpine
+FROM python:3.10-slim
 
-COPY frontend /usr/share/nginx/html
-COPY resource /usr/share/nginx/html/resource
+WORKDIR /app
 
-EXPOSE 80
+COPY requirements.txt .
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . /app
+
+CMD ["uvicorn", "backend.facade:app", "--host", "0.0.0.0", "--port", "8080"]

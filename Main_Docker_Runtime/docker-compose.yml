@@ -1,7 +1,12 @@
+version: '3.8'
+
 services:
   glass-site:
     build: .
     container_name: glass-site
     ports:
-      - "8080:80"
+      - "8080:8080"
+    volumes:
+      - .:/app
     restart: unless-stopped
+    
