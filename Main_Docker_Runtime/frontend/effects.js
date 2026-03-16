@@ -58,8 +58,6 @@ export class RainEffect {
     this.drops = [];
     this.animationId = null;
     this.handleResize = this.resize.bind(this);
-
-    // [완전 분리] 백엔드에서 생성해준 파라미터만 수용합니다.
     this.intensity = params.intensity;
     this.windDirection = params.windDirection;
   }

@@ -1,13 +1,16 @@
 import os
+import random
+import asyncio
+import uuid
+from typing import List, Dict
+
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
-import asyncio
-import uuid
-from typing import List, Dict
+
 
 app = FastAPI(title="Chatbot Middle-end API")
 
@@ -112,7 +115,26 @@ async def save_theme_preference(req: ThemeRequest):
     print(f"[Backend] 사용자 테마 취향 저장됨: {req.theme}")
     return {"status": "success"}
 
-
+@app.get("/api/weather")
+async def get_weather():
+    # 1. 4가지 날씨 중 하나를 무작위로 뽑습니다.
+    weather_types = ['clear', 'cloudy', 'rain', 'night']
+    selected_weather = random.choice(weather_types)
+    
+    # 2. 파라미터도 각각 어울리는 범위 내에서 무작위로 생성합니다.
+    return {
+        "type": selected_weather,
+        "params": {
+            "intensity": round(random.uniform(0.2, 1.5), 2),      # 0.2 ~ 1.5 사이의 비 굵기
+            "windDirection": round(random.uniform(-1.0, 1.0), 2), # -1.0(좌풍) ~ 1.0(우풍)
+            "cloudDensity": random.randint(3, 10),                # 3개 ~ 10개 사이의 구름
+            "starDensity": random.randint(100, 300)               # 100개 ~ 300개 사이의 별
+        }
+    }
+    
+    
+    
+    
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RESOURCE_DIR = os.path.join(BASE_DIR, "resource")
