@@ -1,0 +1,151 @@
+/* ==========================================================
+   MEDIA QUERIES (반응형)
+   ========================================================== */
+.sidebar-overlay,
+.right-sidebar-overlay { 
+  display: none; 
+  position: absolute; 
+  inset: 0; 
+  z-index: 40; 
+  background: rgba(0, 0, 0, 0.35); 
+  backdrop-filter: blur(2px); 
+  -webkit-backdrop-filter: blur(2px); 
+  border-radius: inherit; 
+  opacity: 0; 
+  transition: opacity 0.3s ease; 
+}
+
+.sidebar-overlay.show,
+.right-sidebar-overlay.show { 
+  opacity: 1; 
+}
+
+@media (max-width: 1024px) {
+  .app-shell { padding: 18px; }
+  .main-panel { border-radius: 24px; height: calc(100vh - 36px); height: calc(100dvh - 36px); }
+  
+  .sidebar { width: 240px; padding: 18px 14px; }
+  .right-sidebar { width: 280px; padding: 18px 14px; } /* 우측 사이드바 테블릿 대응 */
+  
+  .sidebar-title { font-size: 24px; }
+  .hero h1 { font-size: 48px; }
+  .hero p { font-size: 17px; }
+  .page-section h2 { font-size: 30px; }
+  .page-section p { font-size: 16px; }
+  .top-bar { padding: 16px 22px; }
+}
+
+@media (max-width: 768px) {
+  .app-shell { padding: 10px; }
+  .main-panel { border-radius: 20px; height: calc(100vh - 20px); height: calc(100dvh - 20px); position: relative; }
+  
+  .light-1 { width: 220px; height: 220px; } 
+  .light-2 { width: 260px; height: 260px; } 
+  .light-3 { width: 280px; height: 280px; }
+  
+  .img-1 { height: 160px; } 
+  .img-2 { height: 140px; } 
+  .img-3 { height: 160px; }
+  
+  /* 왼쪽 사이드바 (모바일) */
+  .sidebar { 
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    height: 100%; 
+    width: 0; 
+    padding: 0; 
+    opacity: 0; 
+    z-index: 50; 
+    border-right: none; 
+    border-radius: 20px 0 0 20px; 
+    background: rgba(255, 255, 255, 0.82); 
+    backdrop-filter: blur(24px); 
+    -webkit-backdrop-filter: blur(24px); 
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.12); 
+    white-space: nowrap; 
+    overflow: hidden; 
+    transition: width 0.32s cubic-bezier(0.4, 0, 0.2, 1), padding 0.32s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.28s ease; 
+  }
+  
+  .sidebar.open { width: 280px; padding: 22px 18px; opacity: 1; }
+  .sidebar.collapsed { width: 0; padding: 0; opacity: 0; border-right: none; }
+  .sidebar-overlay { display: block; }
+
+  /* 오른쪽 사이드바 (모바일) */
+  .right-sidebar { 
+    position: absolute; 
+    top: 0; 
+    right: 0; /* 우측에 부착 */
+    left: auto;
+    height: 100%; 
+    width: 0; 
+    padding: 0; 
+    opacity: 0; 
+    z-index: 50; 
+    border-left: none; 
+    border-radius: 20px 0 0 20px; 
+    background: rgba(255, 255, 255, 0.82); 
+    backdrop-filter: blur(24px); 
+    -webkit-backdrop-filter: blur(24px); 
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12); /* 그림자 방향 변경 */
+    white-space: nowrap; 
+    overflow: hidden; 
+    transition: width 0.32s cubic-bezier(0.4, 0, 0.2, 1), padding 0.32s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.28s ease; 
+  }
+
+  .right-sidebar.open { width: 300px; padding: 22px 18px; opacity: 1; }
+  .right-sidebar.collapsed { width: 0; padding: 0; opacity: 0; border-left: none; }
+  .right-sidebar-overlay { display: block; }
+  
+  .top-bar { padding: 12px 16px; }
+  .hero { margin-bottom: 80px; padding: 0 16px; }
+  .hero h1 { font-size: 36px; letter-spacing: -0.03em; }
+  .hero p { font-size: 15px; line-height: 1.7; margin-top: 16px; }
+  .hero-label { font-size: 11px; letter-spacing: 0.3em; }
+  
+  .page-section { padding: 28px 16px; }
+  .page-section h2 { font-size: 26px; }
+  .page-section p { font-size: 15px; }
+  
+  .chat-history { padding: 0 12px; gap: 16px; }
+  .message { max-width: 88%; padding: 13px 16px; font-size: 14px; }
+  
+  .chat-wrap { padding: 0 10px calc(16px + env(safe-area-inset-bottom)) 10px; }
+  .chat-box { gap: 8px; padding: 8px; border-radius: 22px; }
+  .chat-box textarea { min-height: 46px; padding: 12px 10px; font-size: 15px; border-radius: 16px; }
+  .chat-box button#sendBtn { height: 46px; padding: 0 16px; font-size: 13px; border-radius: 14px; }
+  .chat-box.expanded textarea { min-height: 120px; }
+  
+  .theme-popup { left: 50%; transform: translateX(-50%) translateY(10px); bottom: 70px; }
+  .theme-popup.show { transform: translateX(-50%) translateY(0); }
+  
+  body[data-theme="dark"] .sidebar,
+  body[data-theme="dark"] .right-sidebar { background: rgba(17,24,39,1); }
+}
+
+@media (max-width: 480px) {
+  .app-shell { padding: 6px; }
+  .main-panel { border-radius: 16px; height: calc(100vh - 12px); height: calc(100dvh - 12px); }
+  .hero h1 { font-size: 28px; }
+  .hero p { font-size: 14px; }
+  .message { max-width: 94%; padding: 11px 14px; font-size: 13px; }
+  .chat-box { border-radius: 18px; padding: 7px; }
+  .chat-box textarea { font-size: 14px; padding: 10px 8px; min-height: 42px; }
+  .chat-box button#sendBtn { height: 42px; padding: 0 13px; font-size: 12px; border-radius: 12px; }
+  .expand-btn { display: none; }
+  
+  .sidebar.open,
+  .right-sidebar.open { width: 100%; border-radius: 0; }
+}
+
+@media (max-width: 896px) and (orientation: landscape) {
+  .app-shell { padding: 8px; }
+  .main-panel { height: calc(100vh - 16px); height: calc(100dvh - 16px); border-radius: 18px; }
+  .hero { margin-bottom: 60px; }
+  .hero h1 { font-size: 32px; }
+  .hero p { font-size: 14px; margin-top: 10px; }
+  .chat-wrap { padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
+  .chat-box textarea { min-height: 42px; }
+  .chat-box button#sendBtn { height: 42px; }
+}

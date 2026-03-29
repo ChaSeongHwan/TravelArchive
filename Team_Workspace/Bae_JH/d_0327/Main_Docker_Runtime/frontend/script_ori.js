@@ -94,8 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
     chatHistory.style.display = 'none';
     chatWrap.style.display = 'none';
     pageSection.style.display = 'none';
-    // fork 버전의 변경사항: 지도를 제어하는 topBarActions 영역이 전역에서 항상 보이도록 flex로 유지
-    topBarActions.style.display = 'flex';
+    topBarActions.style.display = 'none';
 
     if (viewName === 'home') {
       heroSection.style.display = 'flex'; chatWrap.style.display = 'block'; currentSessionId = null;

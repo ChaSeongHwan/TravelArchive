@@ -1,0 +1,86 @@
+* { 
+  box-sizing: border-box; 
+}
+
+html, body { 
+  margin: 0; 
+  width: 100%; 
+  height: 100%; 
+  font-family: "Pretendard", "Noto Sans KR", "Apple SD Gothic Neo", sans-serif; 
+}
+
+body { 
+  overflow: hidden; 
+  color: #111827; 
+  background: #bcd3e6; 
+  transition: background 0.5s ease; 
+}
+
+/* ==========================================================
+   커스텀 스크롤바
+   ========================================================== */
+.sidebar-list::-webkit-scrollbar, 
+.chat-history::-webkit-scrollbar, 
+.chat-box textarea::-webkit-scrollbar { 
+  width: 6px; 
+  height: 6px; 
+}
+
+.sidebar-list::-webkit-scrollbar-track, 
+.chat-history::-webkit-scrollbar-track, 
+.chat-box textarea::-webkit-scrollbar-track { 
+  background-color: transparent; 
+}
+
+.sidebar-list::-webkit-scrollbar-thumb, 
+.chat-history::-webkit-scrollbar-thumb, 
+.chat-box textarea::-webkit-scrollbar-thumb { 
+  background-color: rgba(255, 255, 255, 0); 
+  border-radius: 10px; 
+}
+
+.sidebar-list:hover::-webkit-scrollbar-thumb, 
+.chat-history:hover::-webkit-scrollbar-thumb, 
+.chat-box textarea:hover::-webkit-scrollbar-thumb { 
+  background-color: rgba(255, 255, 255, 0.4); 
+}
+
+/* 스크롤바 다크모드 대응 */
+body[data-theme="dark"] .sidebar-list:hover::-webkit-scrollbar-thumb,
+body[data-theme="dark"] .chat-history:hover::-webkit-scrollbar-thumb,
+body[data-theme="dark"] .chat-box textarea:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
+body[data-theme="dark"] .sidebar-list::-webkit-scrollbar-thumb:active,
+body[data-theme="dark"] .chat-history::-webkit-scrollbar-thumb:active,
+body[data-theme="dark"] .chat-box textarea::-webkit-scrollbar-thumb:active {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+/* ==========================================================
+   KEYFRAMES (공통 애니메이션)
+   ========================================================== */
+@keyframes floatLight { 
+  0%, 100% { transform: translateY(0px); } 
+  50% { transform: translateY(-14px); } 
+}
+
+/* 마인크래프트 풍 파노라마 이동 애니메이션 */
+@keyframes panPanorama { 
+  0% { transform: translateX(0); } 
+  100% { transform: translateX(-50%); } 
+}
+
+@keyframes messageFadeIn { 
+  from { opacity: 0; transform: translateY(10px); } 
+  to { opacity: 1; transform: translateY(0); } 
+}
+@keyframes bounce { 
+  0%, 80%, 100% { transform: scale(0); } 
+  40% { transform: scale(1); } 
+}
+@keyframes driftCloud {
+  0% { transform: translateX(-300px); }
+  100% { transform: translateX(110vw); }
+}

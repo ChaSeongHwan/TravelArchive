@@ -1,0 +1,21 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: travelarchive_backend
+    environment:
+      # db 컴포즈 파일에서 지정한 컨테이너 이름(travelarchive_db)을 호스트 주소로 사용합니다.
+      - DATABASE_URL
+    volumes:
+      - .:/app
+    networks:
+      - TravelArchiveNetwork
+    expose:
+      # 호스트 노출(ports)이 아닌, 동일 도커 네트워크 내 Nginx에게만 8000번 포트를 엽니다.
+      - "8000"
+    restart: always
+
+networks:
+  TravelArchiveNetwork:
+    external: true

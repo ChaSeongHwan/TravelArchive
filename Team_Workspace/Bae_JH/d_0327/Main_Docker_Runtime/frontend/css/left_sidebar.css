@@ -1,0 +1,218 @@
+/* ==========================================================
+   SIDEBAR
+   ========================================================== */
+.sidebar { 
+  width: 280px; 
+  flex-shrink: 0; 
+  display: flex; 
+  flex-direction: column; 
+  padding: 22px 18px; 
+  border-right: 1px solid rgba(255,255,255,0.20); 
+  background: rgba(255,255,255,0.08); 
+  transition: width 0.3s ease, padding 0.3s ease, opacity 0.3s ease; 
+  overflow: hidden; 
+  white-space: nowrap; 
+}
+
+.sidebar.collapsed { width: 0; padding: 0; opacity: 0; border-right: none; }
+
+.sidebar-header { padding: 0 10px; margin-bottom: 24px; position: relative; }
+
+.sidebar-label { 
+  font-size: 11px; 
+  letter-spacing: 0.34em; 
+  color: rgba(31, 41, 55, 0.55); 
+  transition: color 0.2s; 
+}
+
+.sidebar-label:hover { color: rgba(17, 24, 39, 0.9); font-weight: bold; }
+
+.sidebar-title { margin-top: 8px; font-size: 28px; font-weight: 700; color: rgba(17, 24, 39, 0.90); }
+
+.new-chat-btn { 
+  margin-top: 16px; 
+  width: 100%; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  gap: 8px; 
+  padding: 12px; 
+  border: 1px solid rgba(255,255,255,0.4); 
+  border-radius: 16px; 
+  background: rgba(255,255,255,0.25); 
+  color: rgba(17,24,39,0.9); 
+  font-size: 14px; 
+  font-weight: 700; 
+  cursor: pointer; 
+  transition: 0.2s ease; 
+}
+
+.new-chat-btn:hover { background: rgba(255,255,255,0.45); transform: translateY(-1px); }
+
+.sidebar-section-title { 
+  margin-top: 24px; 
+  margin-bottom: 12px; 
+  padding: 0 10px; 
+  font-size: 14px; 
+  font-weight: 700; 
+  color: rgba(31, 41, 55, 0.80); 
+}
+
+.sidebar-list { flex: 1; overflow-y: auto; padding-right: 4px; }
+
+/* 사이드바 아이템 및 수정/삭제 액션 관련 */
+.sidebar-item-wrapper {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  position: relative;
+  width: 100%;
+}
+
+.sidebar-item { 
+  width: 100%; 
+  display: flex; 
+  align-items: center; 
+  gap: 12px; 
+  margin-bottom: 0; 
+  padding: 13px 14px; 
+  border: 1px solid rgba(255,255,255,0.18); 
+  border-radius: 18px; 
+  background: rgba(255,255,255,0.16); 
+  color: rgba(17, 24, 39, 0.88); 
+  font-size: 14px; 
+  text-align: left; 
+  cursor: pointer; 
+  transition: 0.2s ease; 
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-item:hover { transform: translateY(-1px); background: rgba(255,255,255,0.26); }
+
+.dot { width: 8px; height: 8px; flex-shrink: 0; border-radius: 999px; background: rgba(59, 130, 246, 0.8); }
+
+.sidebar-item-edit-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid rgba(59, 130, 246, 0.8);
+  border-radius: 18px;
+  background: #fff;
+  color: #111827;
+  font-size: 14px;
+  outline: none;
+  display: none; 
+}
+
+.session-actions {
+  position: absolute;
+  right: 10px;
+  display: none; 
+  gap: 4px;
+  align-items: center;
+}
+
+.sidebar-item-wrapper:hover .session-actions { display: flex; }
+
+.session-action-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: rgba(17,24,39,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 6px;
+  transition: 0.2s ease;
+}
+
+.session-action-btn:hover {
+  background: rgba(255, 255, 255, 0.5);
+  color: rgba(17,24,39,1);
+}
+
+.sidebar-footer { 
+  margin-top: 14px; 
+  padding: 12px; 
+  border-radius: 18px; 
+  border: 1px solid rgba(255,255,255,0.18); 
+  background: rgba(255,255,255,0.12); 
+  display: flex; 
+  justify-content: space-around; 
+  align-items: center; 
+}
+
+.footer-icon-btn { 
+  background: transparent; 
+  border: none; 
+  color: rgba(31, 41, 55, 0.7); 
+  cursor: pointer; 
+  padding: 8px; 
+  border-radius: 12px; 
+  transition: 0.2s ease; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+}
+
+.footer-icon-btn:hover { background: rgba(255, 255, 255, 0.3); color: rgba(17, 24, 39, 0.95); transform: translateY(-2px); }
+
+/* 테마 변경 팝업 */
+.theme-popup { 
+  position: absolute; 
+  bottom: 60px; 
+  left: 12px; 
+  background: rgba(255, 255, 255, 0.85); 
+  backdrop-filter: blur(12px); 
+  -webkit-backdrop-filter: blur(12px); 
+  border: 1px solid rgba(255,255,255,0.4); 
+  border-radius: 16px; 
+  padding: 10px; 
+  display: flex; 
+  flex-wrap: wrap; 
+  gap: 8px; 
+  width: 170px; 
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+  opacity: 0; 
+  pointer-events: none; 
+  transform: translateY(10px); 
+  transition: all 0.2s ease; 
+  z-index: 100; 
+}
+
+.theme-popup.show { opacity: 1; pointer-events: auto; transform: translateY(0); }
+
+.theme-swatch { 
+  width: 30px; 
+  height: 30px; 
+  border-radius: 50%; 
+  border: 2px solid rgba(255,255,255,0.8); 
+  cursor: pointer; 
+  transition: transform 0.2s; 
+}
+.theme-swatch:hover { transform: scale(1.1); border-color: #fff; }
+
+/* 토스트(Toast) 알림 스타일 */
+.toast-notification {
+  position: fixed;
+  top: 40px; 
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px); 
+  background: rgba(17, 24, 39, 0.85);
+  color: #ffffff;
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-size: 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 9999;
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none; 
+}
+
+.toast-notification.show { opacity: 1; transform: translateX(-50%) translateY(0); }

@@ -1,0 +1,197 @@
+/* ==========================================================
+   BACKGROUND (기본 배경 씬)
+   ========================================================== */
+.bg-scene { 
+  position: fixed; 
+  inset: 0; 
+  overflow: hidden; 
+  z-index: 0; 
+}
+
+.bg-gradient {
+  position: absolute; 
+  inset: 0; 
+  transition: background 0.5s ease, opacity 0.5s ease;
+  background: radial-gradient(circle at 20% 15%, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.35) 18%, rgba(255,255,255,0) 40%),
+              radial-gradient(circle at 80% 20%, rgba(220,240,255,0.55) 0%, rgba(220,240,255,0.18) 25%, rgba(220,240,255,0) 45%),
+              linear-gradient(180deg, #dce8f3 0%, #c3d8e7 45%, #a9c3d8 100%);
+}
+
+.bg-light { 
+  position: absolute; 
+  border-radius: 999px; 
+  filter: blur(80px); 
+  opacity: 0.65; 
+  animation: floatLight 12s ease-in-out infinite; 
+  transition: opacity 0.3s ease; 
+}
+
+.light-1 { top: -80px; left: -100px; width: 360px; height: 360px; background: rgba(255,255,255,0.65); }
+.light-2 { top: 80px; right: 40px; width: 420px; height: 420px; background: rgba(180, 225, 255, 0.40); animation-duration: 16s; }
+.light-3 { bottom: -80px; left: 30%; width: 460px; height: 460px; background: rgba(130, 190, 235, 0.28); animation-duration: 20s; }
+
+/* 사진 파노라마 전용 레이어 */
+.bg-panorama {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%; /* 화면의 2배 너비로 여유공간 확보 */
+  height: 100%;
+  background-size: cover;
+  background-position: left center;
+  z-index: 2;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+.mist { 
+  position: absolute; 
+  left: -10%; 
+  width: 120%; 
+  border-radius: 999px; 
+  filter: blur(50px); 
+  z-index: 3; 
+  pointer-events: none; 
+  transition: opacity 0.3s ease; 
+}
+
+.mist-1 { top: 30%; height: 120px; background: rgba(255,255,255,0.10); }
+.mist-2 { bottom: 18%; height: 160px; background: rgba(255,255,255,0.08); }
+
+/* ==========================================================
+   FOREGROUND APP (레이아웃 패널)
+   ========================================================== */
+.app-shell { 
+  position: relative; 
+  z-index: 10; 
+  height: 100vh; 
+  height: 100dvh; 
+  padding: 28px; 
+}
+
+.main-panel { 
+  width: 100%; 
+  height: calc(100vh - 56px); 
+  height: calc(100dvh - 56px); 
+  display: flex; 
+  overflow: hidden; 
+  border: 1px solid rgba(255,255,255,0.34); 
+  border-radius: 32px; 
+  background: rgba(255,255,255,0.14); 
+  backdrop-filter: blur(22px); 
+  -webkit-backdrop-filter: blur(22px); 
+  box-shadow: 0 24px 80px rgba(24, 39, 75, 0.18), inset 0 1px 0 rgba(255,255,255,0.28); 
+}
+
+/* ==========================================================
+   MAIN CONTENT
+   ========================================================== */
+.content { 
+  flex: 1; 
+  min-width: 0; 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  position: relative; 
+  padding: 0; 
+}
+
+.top-bar { 
+  width: 100%; 
+  padding: 20px 30px; 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center;
+  flex-shrink: 0; 
+}
+
+.menu-btn { 
+  background: transparent; 
+  border: none; 
+  cursor: pointer; 
+  color: rgba(17, 24, 39, 0.7); 
+  padding: 8px; 
+  border-radius: 8px; 
+  transition: background 0.2s, color 0.2s; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+}
+
+.menu-btn:hover { 
+  background: rgba(255, 255, 255, 0.3); 
+  color: rgba(17, 24, 39, 1); 
+}
+
+.top-bar-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.top-action-btn {
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.4);
+  color: rgba(17, 24, 39, 0.8);
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.top-action-btn:hover {
+  background: rgba(255, 255, 255, 0.4);
+  color: rgba(17, 24, 39, 1);
+}
+
+.hero { 
+  max-width: 920px; 
+  text-align: center; 
+  flex: 1; 
+  display: flex; 
+  flex-direction: column; 
+  justify-content: center; 
+  margin-bottom: 120px; 
+}
+
+.hero-label { 
+  margin-bottom: 12px; 
+  font-size: 12px; 
+  letter-spacing: 0.42em; 
+  color: rgba(31, 41, 55, 0.45); 
+}
+
+.hero h1 { 
+  margin: 0; 
+  font-size: 62px; 
+  line-height: 1.08; 
+  letter-spacing: -0.04em; 
+  color: rgba(17, 24, 39, 0.92); 
+}
+
+.hero p { 
+  max-width: 760px; 
+  margin: 24px auto 0; 
+  font-size: 19px; 
+  line-height: 1.8; 
+  color: rgba(31, 41, 55, 0.76); 
+}
+
+.page-section { 
+  display: none; 
+  width: 100%; 
+  max-width: 860px; 
+  flex: 1; 
+  padding: 40px 20px; 
+  flex-direction: column; 
+  justify-content: center; 
+  align-items: center; 
+  text-align: center; 
+  animation: messageFadeIn 0.3s ease-out forwards; 
+}
+
+.page-section h2 { font-size: 36px; margin-bottom: 20px; color: rgba(17, 24, 39, 0.9); }
+.page-section p { font-size: 18px; color: rgba(31, 41, 55, 0.8); line-height: 1.6; }
