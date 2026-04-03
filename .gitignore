@@ -4,13 +4,26 @@
 # 사용자가 명시적으로 관리하는 데이터 폴더 및 파일 확장자
 db/data/*
 !db/data/.gitkeep
+
+db/redis_data/*
+!db/redis_data/.gitkeep
+
 uploads/*
 !uploads/.gitkeep
+
 exports/*
 !exports/.gitkeep
 
 default.conf
 nginx.conf
+certified.conf
+
+# 1. certbot 폴더 안은 아예 쳐다보지도 마 (안을 뒤지지 않음)
+Team_Workspace/Bae_JH/Main_Docker_Runtime/certbot/conf/*
+Team_Workspace/Bae_JH/Main_Docker_Runtime/certbot/www/*
+
+# 2. (선택사항) 만약 위 설정으로도 에러가 나면 아래처럼 아예 통째로 막아
+# Team_Workspace/Bae_JH/Main_Docker_Runtime/certbot/
 
 # ==============================================================================
 # 2. 가상 환경 및 환경 변수 (Virtual Environments & ENV Variables)

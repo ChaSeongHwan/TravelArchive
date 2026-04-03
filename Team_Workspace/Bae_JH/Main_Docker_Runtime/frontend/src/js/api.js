@@ -195,5 +195,67 @@ export const BackendHooks = {
       console.error("API Error (uploadFiles):", error);
       throw error;
     }
+  },
+
+  /**
+   * saves user's memo for a specific session.
+   */
+  async saveMemo(sessionId, memoContent) {
+    try {
+      const res = await fetch(`/api/sessions/${sessionId}/memo`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ memo: memoContent })
+      });
+      return await res.json();
+    } catch (error) {
+      console.error("API Error (saveMemo):", error);
+      throw error;
+    }
+  },
+
+  /**
+   * fetches user's memo for a specific session.
+   */
+  async fetchMemo(sessionId) {
+    try {
+      const res = await fetch(`/api/sessions/${sessionId}/memo`);
+      return await res.json();
+    } catch (error) {
+      console.error("API Error (fetchMemo):", error);
+      throw error;
+    }
+  },
+
+  /**
+   * updates the current schedule (plan) for a specific session.
+   * @param {string} sessionId 
+   * @param {Array|Object} planData - JSON representing the trip plan.
+   */
+  async updateSchedule(sessionId, planData) {
+    try {
+      const res = await fetch(`/api/sessions/${sessionId}/plan`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: planData })
+      });
+      return await res.json();
+    } catch (error) {
+      console.error("API Error (updateSchedule):", error);
+      throw error;
+    }
+  },
+
+  /**
+   * fetches the current schedule (plan) for a specific session.
+   */
+  async fetchSchedule(sessionId) {
+    try {
+      const res = await fetch(`/api/sessions/${sessionId}/plan`);
+      return await res.json();
+    } catch (error) {
+      console.error("API Error (fetchSchedule):", error);
+      throw error;
+    }
   }
 };
