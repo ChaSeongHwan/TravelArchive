@@ -10,7 +10,9 @@
   min-height: 0;
   padding: 24px 12px 24px 18px !important; /* 18px left, 12px right base */
   border-right: 1px solid rgba(255, 255, 255, 0.20);
-  background: rgba(255, 255, 255, var(--app-glass-opacity, 0.08));
+  background: var(--sidebar-bg, rgba(255, 255, 255, 0.22));
+  backdrop-filter: blur(35px); /* 본문(22px)보다 더 강력한 블러 */
+  -webkit-backdrop-filter: blur(35px);
   transition: width 0.3s ease, padding 0.3s ease, opacity 0.3s ease;
   overflow: hidden;
   border-bottom-left-radius: 32px; /* Match main-panel radius */
@@ -169,47 +171,114 @@
   padding-right: 4px;
 }
 
-.section-toggle-btn {
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: rgba(31, 41, 55, 0.7);
-  cursor: pointer;
-  width: 20px;
-  height: 20px;
-  border-radius: 6px;
+.section-toggle-btn, .row-action-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 14px;
+  color: rgba(17, 24, 39, 0.75);
+  cursor: pointer;
   transition: all 0.2s ease;
-  margin-bottom: 6px;
+  margin-bottom: 0;
+  padding: 0;
 }
 
-.section-toggle-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-  color: rgba(17, 24, 39, 0.9);
+.section-toggle-btn:hover, .row-action-btn:hover {
+  background: rgba(255, 255, 255, 0.4);
+  color: rgba(17, 24, 39, 1);
+  border-color: rgba(255, 255, 255, 0.45);
 }
 
-.toggle-icon {
+.row-action-btn.disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+  pointer-events: none; /* 클릭 이벤트 원천 차단 */
+}
+
+.section-toggle-btn .toggle-icon {
   transition: transform 0.3s ease;
 }
 
-.collapsed .toggle-icon {
-  transform: rotate(0deg); /* We'll change the icon content in JS or use rotation if we use + */
+.section-toggle-btn.collapsed .toggle-icon {
+  transform: rotate(-90deg);
 }
 
-.section-toggle-btn.collapsed .line-v {
-  display: block !important;
+.calendar-container {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 180px); /* 헤더 등을 제외한 가용 높이 */
+  min-height: 0;
 }
 
-.section-content-collapsed {
+/* 메모 섹션 관련 스타일 */
+.memo-list-container {
+  overflow-y: auto;
+  margin-bottom: 12px;
+  padding-right: 0;
+  transition: all 0.3s ease;
+  flex: 1; /* 가용 공간 차지 */
+  min-height: 100px;
+}
+
+.memo-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.memo-table td {
+  padding: 0 8px; /* td 패딩 제거 */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  vertical-align: top;
+}
+
+.memo-table tr:last-child td {
+  border-bottom: none;
+}
+
+.memo-input-flat {
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 8px 0; /* 패딩 고정 */
+  font-size: 13px;
+  color: rgba(17, 24, 39, 0.85);
+  outline: none;
+  min-height: 34px; /* 초기 높이 고정 */
+  height: 34px;
+  line-height: 1.4;
+  resize: none !important;
+  transition: none;
+  overflow: hidden;
+  display: block;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+/* 리사이즈 핸들(하얀 점) 및 스크롤바 코너 제거 */
+.memo-input-flat::-webkit-resizer,
+.memo-list-container::-webkit-scrollbar-corner,
+.schedule-list-container::-webkit-scrollbar-corner {
   display: none !important;
+  background: transparent;
 }
 
 .schedule-list-container {
   overflow-y: auto;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   padding-right: 0;
   transition: all 0.3s ease;
+  flex: 1.2; /* 일정 영역 비중을 조금 더 높임 */
+  min-height: 150px;
 }
 
 .calendar-placeholder {
@@ -312,9 +381,9 @@
   gap: 12px;
   margin-bottom: 0;
   padding: 10px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.26);
   color: rgba(17, 24, 39, 0.88);
   font-size: 14px;
   text-align: left;
@@ -328,7 +397,7 @@
 
 .sidebar-item:hover {
   transform: translateY(-1px);
-  background: rgba(255, 255, 255, 0.26);
+  background: rgba(255, 255, 255, 0.36);
 }
 
 .dot {

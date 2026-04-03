@@ -107,6 +107,11 @@ export const SidebarManager = {
       hideView.style.display = 'none';
       showHeader.style.display = 'block';
       hideHeader.style.display = 'none';
+      
+      if (activeTab === tabCalendar) {
+        // Recalculate all memo heights when showing calendar tab
+        setTimeout(() => this.adjustAllMemoHeights(), 0);
+      }
     };
 
     tabSessions.addEventListener('click', () => switchTab(tabSessions, tabCalendar, sessionView, calendarView, sessionHeaderControls, calendarHeaderControls));
@@ -122,23 +127,154 @@ export const SidebarManager = {
       sessionView.style.display = 'none';
       calendarHeaderControls.style.display = 'block';
       sessionHeaderControls.style.display = 'none';
+      setTimeout(() => this.adjustAllMemoHeights(), 0);
     }
   },
 
+  adjustAllMemoHeights() {
+    const textareas = document.querySelectorAll('.memo-input-flat');
+    textareas.forEach(textarea => {
+      textarea.style.height = '1px';
+      textarea.style.height = (textarea.scrollHeight) + 'px';
+    });
+  },
+
   /**
-   * initializes folding.
+   * initializes folding and row management.
    */
   initFolding(elements) {
-    const setupFolding = (btn, content) => {
+    const isSmallHeight = window.innerHeight < 850;
+
+    const setupFolding = (btn, content, forceCollapse = false) => {
       if (!btn || !content) return;
+      
+      // 해당 섹션 내의 +/- 버튼들 찾기
+      const header = btn.parentElement;
+      const rowButtons = header ? header.querySelectorAll('.row-action-btn') : [];
+
+      const toggle = (collapse) => {
+        content.classList.toggle('section-content-collapsed', collapse);
+        btn.classList.toggle('collapsed', collapse);
+        btn.title = collapse ? '펴기' : '접기';
+        content.style.display = collapse ? 'none' : 'block';
+        
+        // +/- 버튼들의 활성/비활성 상태 시각적 동기화
+        rowButtons.forEach(rowBtn => {
+          rowBtn.classList.toggle('disabled', collapse);
+        });
+      };
+
       btn.addEventListener('click', () => {
-        const isCollapsed = content.classList.toggle('section-content-collapsed');
-        btn.classList.toggle('collapsed', isCollapsed);
-        btn.title = isCollapsed ? '펴기' : '접기';
+        const currentlyCollapsed = content.classList.contains('section-content-collapsed');
+        toggle(!currentlyCollapsed);
       });
+
+      // 초기 상태 설정
+      if (forceCollapse) {
+        toggle(true);
+      }
     };
-    setupFolding(elements.toggleCalendarBtn, elements.calendarContent);
-    setupFolding(elements.toggleScheduleBtn, elements.scheduleContent);
+
+    setupFolding(elements.toggleCalendarBtn, elements.calendarContent, isSmallHeight);
+    setupFolding(elements.toggleScheduleBtn, elements.scheduleContent, isSmallHeight);
+    setupFolding(elements.toggleMemoBtn, elements.memoContent, isSmallHeight);
+
+    // Row management for Memo
+    this.initMemoRows(elements);
+    // Row management for Schedule (assuming it's a table or list)
+    this.initScheduleRows(elements);
+  },
+
+  initMemoRows(elements) {
+    const tableBody = document.getElementById('memoTableBody');
+    if (!tableBody) return;
+
+    const adjustHeight = (textarea) => {
+      textarea.style.height = '1px'; // 강제 리셋 후 높이 계산
+      textarea.style.height = (textarea.scrollHeight) + 'px';
+    };
+
+    const createRow = (index) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="width: 32px; padding-top: 10px; text-align: center; color: rgba(31, 41, 55, 0.4); font-size: 11px; font-weight: 700; border-right: 1px solid rgba(255,255,255,0.05);">${index}</td>
+        <td>
+          <textarea class="memo-input-flat" placeholder="메모를 입력하세요..." rows="1"></textarea>
+        </td>
+      `;
+      const textarea = tr.querySelector('textarea');
+      // 글을 쓸 때 높이 조절
+      textarea.addEventListener('input', () => adjustHeight(textarea));
+      // 시프트+엔터 등 줄바꿈 시 즉시 조절
+      textarea.addEventListener('keydown', () => setTimeout(() => adjustHeight(textarea), 0));
+      
+      // 초기 높이 설정 - CSS의 34px에 맞춤
+      setTimeout(() => {
+        textarea.style.height = '34px';
+        adjustHeight(textarea);
+      }, 0);
+      return tr;
+    };
+
+    // 초기 5줄 생성
+    tableBody.innerHTML = '';
+    for (let i = 1; i <= 5; i++) {
+      tableBody.appendChild(createRow(i));
+    }
+
+    // 줄 추가/삭제 버튼 직접 연결 (elements가 늦게 로드될 경우 대비)
+    const addBtn = document.getElementById('addMemoRowBtn');
+    const removeBtn = document.getElementById('removeMemoRowBtn');
+
+    addBtn?.addEventListener('click', () => {
+      // 접힌 상태라면 무시
+      if (elements.memoContent?.classList.contains('section-content-collapsed')) return;
+      
+      const nextIndex = tableBody.querySelectorAll('tr').length + 1;
+      tableBody.appendChild(createRow(nextIndex));
+    });
+
+    removeBtn?.addEventListener('click', () => {
+      // 접힌 상태라면 무시
+      if (elements.memoContent?.classList.contains('section-content-collapsed')) return;
+      
+      const rows = tableBody.querySelectorAll('tr');
+      if (rows.length > 5) {
+        tableBody.removeChild(rows[rows.length - 1]);
+      }
+    });
+  },
+
+  initScheduleRows(elements) {
+    const addBtn = document.getElementById('addScheduleRowBtn');
+    const removeBtn = document.getElementById('removeScheduleRowBtn');
+    const container = elements.scheduleContent;
+
+    addBtn?.addEventListener('click', () => {
+      // 접힌 상태라면 무시
+      if (container?.classList.contains('section-content-collapsed')) return;
+      
+      const list = container.querySelector('tbody') || container;
+      if (list && list.children.length > 0) {
+        const lastRow = list.lastElementChild;
+        const newRow = lastRow.cloneNode(true);
+        newRow.querySelectorAll('input, td:not(:first-child)').forEach(el => {
+          if (el.tagName === 'INPUT') el.value = '';
+          else if (el.childNodes.length === 1 && el.firstChild.nodeType === 3) el.textContent = '';
+        });
+        list.appendChild(newRow);
+      }
+    });
+
+    removeBtn?.addEventListener('click', () => {
+      // 접힌 상태라면 무시
+      if (container?.classList.contains('section-content-collapsed')) return;
+      
+      const list = container.querySelector('tbody') || container;
+      if (list && list.children.length > 1) {
+        list.removeChild(list.lastElementChild);
+      }
+    });
   },
 
   /**

@@ -9,7 +9,9 @@
   flex-direction: column;
   padding: 22px 18px; /* Match left sidebar padding */
   border-left: 1px solid rgba(255, 255, 255, 0.20);
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--sidebar-bg, rgba(255, 255, 255, 0.22));
+  backdrop-filter: blur(35px);
+  -webkit-backdrop-filter: blur(35px);
   transition: width 0.3s ease, padding 0.3s ease, opacity 0.3s ease;
   overflow: hidden !important;
   border-bottom-right-radius: 32px; /* Match main-panel radius */

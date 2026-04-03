@@ -46,6 +46,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     calendarContent: document.getElementById('calendarContent'),
     toggleScheduleBtn: document.getElementById('toggleScheduleBtn'),
     scheduleContent: document.getElementById('scheduleContent'),
+    addScheduleRowBtn: document.getElementById('addScheduleRowBtn'),
+    removeScheduleRowBtn: document.getElementById('removeScheduleRowBtn'),
+    toggleMemoBtn: document.getElementById('toggleMemoBtn'),
+    memoContent: document.getElementById('memoContent'),
+    addMemoRowBtn: document.getElementById('addMemoRowBtn'),
+    removeMemoRowBtn: document.getElementById('removeMemoRowBtn'),
     rightSidebar: document.getElementById('rightSidebar'),
     rightSidebarContent: document.getElementById('rightSidebarContent'),
     mapToggleBtn: document.getElementById('mapToggleBtn'),
@@ -72,7 +78,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
 
   // 2. Initialization
-  const savedOpacity = localStorage.getItem('appGlassOpacity') || '14';
+  const savedOpacity = localStorage.getItem('appGlassOpacity') || '20';
   document.documentElement.style.setProperty('--app-glass-opacity', savedOpacity / 100);
 
   const bgImages = ['1','2','3','4','5'].map(i => `/resource/bg-long-${i}.jpg`);
@@ -108,6 +114,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         (isCollapsed) ? (side === 'left' ? SidebarManager.openSidebar(elements, config) : SidebarManager.openRightSidebar(elements, config)) 
                        : (side === 'left' ? SidebarManager.closeSidebar(elements) : SidebarManager.closeRightSidebar(elements));
       }
+      
+      // Sidebar transition takes ~300ms
+      setTimeout(() => SidebarManager.adjustAllMemoHeights(), 310);
     });
   };
 
@@ -118,6 +127,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     el?.addEventListener('click', () => {
       if (el === elements.sidebarOverlay) SidebarManager.closeSidebar(elements);
       else SidebarManager.closeRightSidebar(elements);
+      setTimeout(() => SidebarManager.adjustAllMemoHeights(), 310);
     });
   });
 
@@ -125,13 +135,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     config.currentLeftWidth = 300;
     elements.sidebar.style.width = '300px';
     localStorage.setItem('leftSidebarCustomWidth', 300);
+    setTimeout(() => SidebarManager.adjustAllMemoHeights(), 310);
   });
 
   elements.resetRightSidebarBtn?.addEventListener('click', () => {
     config.currentRightWidth = 300;
     elements.rightSidebar.style.width = '300px';
     localStorage.setItem('rightSidebarCustomWidth', 300);
-    setTimeout(() => window.kakaoMap?.relayout(), 310);
+    setTimeout(() => {
+      window.kakaoMap?.relayout();
+      SidebarManager.adjustAllMemoHeights();
+    }, 310);
   });
 
   // Navigation & Chat
@@ -173,6 +187,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       SidebarManager.closeRightSidebar(elements, { silent: true });
     }
     SidebarManager.syncContentState(elements);
+    SidebarManager.adjustAllMemoHeights();
   });
 
   updatePlaceholder();

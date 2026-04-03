@@ -74,8 +74,7 @@
               <div class="section-subtitle">달력</div>
               <button class="section-toggle-btn" id="toggleCalendarBtn" title="접기/펴기">
                 <svg class="toggle-icon" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                  <line class="line-h" x1="5" y1="12" x2="19" y2="12"></line>
-                  <line class="line-v hidden" x1="12" y1="5" x2="12" y2="19"></line>
+                  <polyline points="6 9 12 15 18 9"></polyline>
                 </svg>
               </button>
             </div>
@@ -85,15 +84,39 @@
             
             <div class="section-header mt-10">
               <div class="section-subtitle">상세 일정</div>
-              <button class="section-toggle-btn" id="toggleScheduleBtn" title="접기/펴기">
-                <svg class="toggle-icon" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                  <line class="line-h" x1="5" y1="12" x2="19" y2="12"></line>
-                  <line class="line-v hidden" x1="12" y1="5" x2="12" y2="19"></line>
-                </svg>
-              </button>
+              <div class="flex items-center gap-8">
+                <button class="row-action-btn" id="addScheduleRowBtn" title="줄 추가">+</button>
+                <button class="row-action-btn" id="removeScheduleRowBtn" title="줄 삭제">-</button>
+                <button class="section-toggle-btn" id="toggleScheduleBtn" title="접기/펴기">
+                  <svg class="toggle-icon" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </button>
+              </div>
             </div>
             <div class="schedule-list-container" id="scheduleContent">
               <!-- Rendered via js/schedule.js -->
+            </div>
+
+            <!-- 메모 섹션 추가 -->
+            <div class="section-header mt-10">
+              <div class="section-subtitle">메모</div>
+              <div class="flex items-center gap-8">
+                <button class="row-action-btn" id="addMemoRowBtn" title="줄 추가">+</button>
+                <button class="row-action-btn" id="removeMemoRowBtn" title="줄 삭제">-</button>
+                <button class="section-toggle-btn" id="toggleMemoBtn" title="접기/펴기">
+                  <svg class="toggle-icon" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="memo-list-container" id="memoContent">
+              <table class="schedule-table memo-table">
+                <tbody id="memoTableBody">
+                  <!-- Rendered via js/sidebar.js -->
+                </tbody>
+              </table>
             </div>
           </div>
         </div>

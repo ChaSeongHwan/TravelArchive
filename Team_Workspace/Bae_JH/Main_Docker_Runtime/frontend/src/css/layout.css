@@ -171,21 +171,27 @@
 }
 
 .menu-btn {
-  background: transparent;
-  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: rgba(17, 24, 39, 0.8);
   cursor: pointer;
-  color: rgba(17, 24, 39, 0.7);
-  padding: 8px;
-  border-radius: 8px;
-  transition: background 0.2s, color 0.2s;
+  padding: 8px 12px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .menu-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.4);
   color: rgba(17, 24, 39, 1);
+  transform: translateY(-1px);
+}
+
+.menu-btn svg {
+  width: 20px;
+  height: 20px;
 }
 
 .top-action-btn {

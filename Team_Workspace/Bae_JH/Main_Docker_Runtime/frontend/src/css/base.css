@@ -6,6 +6,8 @@
   --text-main: #111827;
   --text-muted: rgba(31, 41, 55, 0.6);
   --glass-bg: rgba(255, 255, 255, var(--app-glass-opacity, 0.14));
+  --sidebar-glass-opacity: calc(var(--app-glass-opacity) + 0.12); /* 본문보다 더 불투명하게 */
+  --sidebar-bg: rgba(255, 255, 255, var(--sidebar-glass-opacity));
   --glass-border: rgba(255, 255, 255, 0.34);
   
   /* Layout */
@@ -45,6 +47,7 @@ body {
    ========================================================== */
 .sidebar-list::-webkit-scrollbar,
 .schedule-list-container::-webkit-scrollbar,
+.memo-list-container::-webkit-scrollbar,
 .chat-history::-webkit-scrollbar,
 .chat-box textarea::-webkit-scrollbar,
 .page-section::-webkit-scrollbar {
@@ -54,6 +57,7 @@ body {
 
 .sidebar-list::-webkit-scrollbar-track,
 .schedule-list-container::-webkit-scrollbar-track,
+.memo-list-container::-webkit-scrollbar-track,
 .chat-history::-webkit-scrollbar-track,
 .chat-box textarea::-webkit-scrollbar-track,
 .page-section::-webkit-scrollbar-track {
@@ -62,6 +66,7 @@ body {
 
 .sidebar-list::-webkit-scrollbar-thumb,
 .schedule-list-container::-webkit-scrollbar-thumb,
+.memo-list-container::-webkit-scrollbar-thumb,
 .chat-history::-webkit-scrollbar-thumb,
 .chat-box textarea::-webkit-scrollbar-thumb,
 .page-section::-webkit-scrollbar-thumb {
@@ -71,6 +76,7 @@ body {
 
 .sidebar-list:hover::-webkit-scrollbar-thumb,
 .schedule-list-container:hover::-webkit-scrollbar-thumb,
+.memo-list-container:hover::-webkit-scrollbar-thumb,
 .chat-history:hover::-webkit-scrollbar-thumb,
 .chat-box textarea:hover::-webkit-scrollbar-thumb,
 .page-section:hover::-webkit-scrollbar-thumb {
@@ -80,6 +86,7 @@ body {
 /* 스크롤바 다크모드 대응 */
 body[data-theme="dark"] .sidebar-list:hover::-webkit-scrollbar-thumb,
 body[data-theme="dark"] .schedule-list-container:hover::-webkit-scrollbar-thumb,
+body[data-theme="dark"] .memo-list-container:hover::-webkit-scrollbar-thumb,
 body[data-theme="dark"] .chat-history:hover::-webkit-scrollbar-thumb,
 body[data-theme="dark"] .chat-box textarea:hover::-webkit-scrollbar-thumb,
 body[data-theme="dark"] .page-section:hover::-webkit-scrollbar-thumb {
@@ -88,6 +95,7 @@ body[data-theme="dark"] .page-section:hover::-webkit-scrollbar-thumb {
 
 body[data-theme="dark"] .sidebar-list::-webkit-scrollbar-thumb:active,
 body[data-theme="dark"] .schedule-list-container::-webkit-scrollbar-thumb:active,
+body[data-theme="dark"] .memo-list-container::-webkit-scrollbar-thumb:active,
 body[data-theme="dark"] .chat-history::-webkit-scrollbar-thumb:active,
 body[data-theme="dark"] .chat-box textarea::-webkit-scrollbar-thumb:active,
 body[data-theme="dark"] .page-section::-webkit-scrollbar-thumb:active {
