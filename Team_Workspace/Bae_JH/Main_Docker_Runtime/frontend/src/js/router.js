@@ -6,6 +6,7 @@ import { renderSettingsPage } from './settings.js';
 import { renderAccountPage } from './account.js';
 import { renderHelpPage } from './help.js';
 import { BackendHooks } from './api.js';
+import { SidebarManager } from './sidebar.js';
 import { showLoadingIndicator, removeLoadingIndicator, appendMessage, adjustTextareaHeight } from './ui.js';
 
 const PAGES = {
@@ -16,7 +17,15 @@ const PAGES = {
 };
 
 export function switchView(viewName, elements) {
-  const { heroSection, chatHistory, chatWrap, pageSection, topBarActions } = elements;
+  const { 
+    heroSection, 
+    chatHistory, 
+    chatWrap, 
+    pageSection, 
+    topBarActions,
+    downloadChatBtn,
+    shareChatBtn
+  } = elements;
   
   // Reset all to none
   heroSection.style.display = 'none';
@@ -30,13 +39,19 @@ export function switchView(viewName, elements) {
     case 'home':
       heroSection.style.display = 'flex';
       chatWrap.style.display = 'block';
+      if (downloadChatBtn) downloadChatBtn.style.display = 'none';
+      if (shareChatBtn) shareChatBtn.style.display = 'none';
       break;
     case 'chat':
       chatHistory.style.display = 'flex';
       chatWrap.style.display = 'block';
+      if (downloadChatBtn) downloadChatBtn.style.display = 'flex';
+      if (shareChatBtn) shareChatBtn.style.display = 'flex';
       break;
     case 'page':
       pageSection.style.display = 'flex';
+      if (downloadChatBtn) downloadChatBtn.style.display = 'none';
+      if (shareChatBtn) shareChatBtn.style.display = 'none';
       break;
   }
 }
@@ -53,6 +68,10 @@ export async function router(state, elements) {
       const loadingId = showLoadingIndicator(chatHistory);
       state.currentSessionId = ssid;
       
+      // Refresh date-specific data
+      SidebarManager.initMemoRows(elements);
+      SidebarManager.initScheduleRows(elements);
+
       try {
         const historyData = await BackendHooks.fetchChatHistory(ssid);
         removeLoadingIndicator(loadingId);
@@ -71,6 +90,10 @@ export async function router(state, elements) {
 
   const page = PAGES[path] || PAGES['#/'];
   state.currentSessionId = null;
+
+  // Refresh date-specific data
+  SidebarManager.initMemoRows(elements);
+  SidebarManager.initScheduleRows(elements);
 
   if (page.type === 'home') {
     switchView('home', elements);

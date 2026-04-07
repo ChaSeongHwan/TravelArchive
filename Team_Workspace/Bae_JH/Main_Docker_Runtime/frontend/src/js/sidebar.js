@@ -3,6 +3,7 @@
  * handles left and right sidebar toggling, resizing, and synchronization.
  */
 import { BackendHooks } from './api.js';
+import { CalendarManager } from './calendar.js';
 
 const debounce = (func, delay) => {
   let timeout;
@@ -69,6 +70,10 @@ export const SidebarManager = {
         }
       }, 310);
     }
+
+    setTimeout(() => {
+      if (window.updatePlaceholder) window.updatePlaceholder();
+    }, 310);
   },
 
   /**
@@ -93,6 +98,10 @@ export const SidebarManager = {
     } else {
       sidebar.style.width = '';
     }
+
+    setTimeout(() => {
+      if (window.updatePlaceholder) window.updatePlaceholder();
+    }, 310);
   },
 
   openSidebar(elements, config) { this._open('left', elements, config); },
@@ -113,12 +122,21 @@ export const SidebarManager = {
       hideHeader.style.display = 'none';
       
       if (activeTab === tabCalendar) {
-        setTimeout(() => this.adjustAllMemoHeights(), 0);
+        setTimeout(() => {
+          this.adjustAllMemoHeights();
+          CalendarManager.updateUI(); // Refresh dots
+        }, 0);
       }
     };
 
     tabSessions.addEventListener('click', () => switchTab(tabSessions, tabCalendar, sessionView, calendarView, sessionHeaderControls, calendarHeaderControls));
     tabCalendar.addEventListener('click', () => switchTab(tabCalendar, tabSessions, calendarView, sessionView, calendarHeaderControls, sessionHeaderControls));
+
+    // Initialize calendar callback
+    CalendarManager.onDateSelect = (date) => {
+        this.initMemoRows(elements);
+        this.initScheduleRows(elements);
+    };
 
     if (tabSessions.classList.contains('active')) {
       sessionView.style.display = 'flex';
@@ -130,7 +148,10 @@ export const SidebarManager = {
       sessionView.style.display = 'none';
       calendarHeaderControls.style.display = 'block';
       sessionHeaderControls.style.display = 'none';
-      setTimeout(() => this.adjustAllMemoHeights(), 0);
+      setTimeout(() => {
+          this.adjustAllMemoHeights();
+          CalendarManager.updateUI();
+      }, 0);
     }
   },
 
@@ -173,9 +194,14 @@ export const SidebarManager = {
     this.initScheduleRows(elements);
   },
 
-  initMemoRows(elements) {
+  async initMemoRows(elements) {
     const tableBody = document.getElementById('memoTableBody');
     if (!tableBody) return;
+
+    const selectedDate = CalendarManager.getSelectedDate();
+    const dateKey = `${selectedDate.getFullYear()}-${selectedDate.getMonth()+1}-${selectedDate.getDate()}`;
+    const hashPart = window.location.hash.split('/chat/')[1] || 'default';
+    const sessionId = hashPart.split('?')[0];
 
     const adjustHeight = (textarea) => {
       textarea.style.height = '1px';
@@ -183,10 +209,9 @@ export const SidebarManager = {
     };
 
     const handleMemoSave = debounce(async (content) => {
-        const sessionId = window.location.hash.split('session_')[1] || 'current';
-        console.log(`[Sync] Saving memo for session ${sessionId}...`);
-        await BackendHooks.saveMemo(sessionId, content);
-    }, 1000);
+        await BackendHooks.saveMemo(sessionId, content, dateKey);
+        CalendarManager.refreshDots();
+    }, 500);
 
     const createRow = (index, content = '') => {
       const tr = document.createElement('tr');
@@ -209,29 +234,58 @@ export const SidebarManager = {
     const addBtn = document.getElementById('addMemoRowBtn');
     const removeBtn = document.getElementById('removeMemoRowBtn');
 
-    addBtn?.addEventListener('click', () => {
-      const nextIndex = tableBody.querySelectorAll('tr').length + 1;
-      tableBody.appendChild(createRow(nextIndex));
-    });
+    if (addBtn) {
+        const newAddBtn = addBtn.cloneNode(true);
+        addBtn.parentNode.replaceChild(newAddBtn, addBtn);
+        newAddBtn.addEventListener('click', () => {
+            const nextIndex = tableBody.querySelectorAll('tr').length + 1;
+            tableBody.appendChild(createRow(nextIndex));
+        });
+    }
 
-    removeBtn?.addEventListener('click', () => {
-      const rows = tableBody.querySelectorAll('tr');
-      if (rows.length > 5) tableBody.removeChild(rows[rows.length - 1]);
-    });
+    if (removeBtn) {
+        const newRemoveBtn = removeBtn.cloneNode(true);
+        removeBtn.parentNode.replaceChild(newRemoveBtn, removeBtn);
+        newRemoveBtn.addEventListener('click', () => {
+            const rows = tableBody.querySelectorAll('tr');
+            if (rows.length > 0) {
+                tableBody.removeChild(rows[rows.length - 1]);
+                const allMemos = Array.from(tableBody.querySelectorAll('textarea')).map(t => t.value).join('\n');
+                handleMemoSave(allMemos);
+            }
+        });
+    }
 
     tableBody.innerHTML = '';
-    for (let i = 1; i <= 5; i++) tableBody.appendChild(createRow(i));
+    try {
+        const data = await BackendHooks.fetchMemo(sessionId, dateKey);
+        const savedContent = data.memo || '';
+        if (savedContent) {
+            const lines = savedContent.split('\n');
+            lines.forEach((line, i) => tableBody.appendChild(createRow(i + 1, line)));
+        } else {
+            for (let i = 1; i <= 3; i++) tableBody.appendChild(createRow(i));
+        }
+    } catch (e) {
+        console.error("Failed to load memo:", e);
+        for (let i = 1; i <= 3; i++) tableBody.appendChild(createRow(i));
+    }
   },
 
-  initScheduleRows(elements) {
+  async initScheduleRows(elements) {
     const tableBody = document.getElementById('scheduleTableBody');
+    const container = document.querySelector('.schedule-list-container');
     if (!tableBody) return;
 
+    const selectedDate = CalendarManager.getSelectedDate();
+    const dateKey = `${selectedDate.getFullYear()}-${selectedDate.getMonth()+1}-${selectedDate.getDate()}`;
+    const hashPart = window.location.hash.split('/chat/')[1] || 'default';
+    const sessionId = hashPart.split('?')[0];
+
     const handleScheduleSave = debounce(async (plan) => {
-        const sessionId = window.location.hash.split('session_')[1] || 'current';
-        console.log(`[Sync] Saving schedule for session ${sessionId}...`);
-        await BackendHooks.updateSchedule(sessionId, plan);
-    }, 1000);
+        await BackendHooks.updateSchedule(sessionId, plan, dateKey);
+        CalendarManager.refreshDots();
+    }, 500);
 
     const createRow = (time = '09:00', activity = '') => {
       const tr = document.createElement('tr');
@@ -254,15 +308,61 @@ export const SidebarManager = {
     const addBtn = document.getElementById('addScheduleRowBtn');
     const removeBtn = document.getElementById('removeScheduleRowBtn');
 
-    addBtn?.addEventListener('click', () => tableBody.appendChild(createRow()));
-    removeBtn?.addEventListener('click', () => {
-      const rows = tableBody.querySelectorAll('tr');
-      if (rows.length > 1) tableBody.removeChild(rows[rows.length - 1]);
-    });
+    if (addBtn) {
+        const newAddBtn = addBtn.cloneNode(true);
+        addBtn.parentNode.replaceChild(newAddBtn, addBtn);
+        newAddBtn.addEventListener('click', () => {
+            tableBody.appendChild(createRow('09:00', ''));
+            updateDynamicHeight();
+        });
+    }
+
+    if (removeBtn) {
+        const newRemoveBtn = removeBtn.cloneNode(true);
+        removeBtn.parentNode.replaceChild(newRemoveBtn, removeBtn);
+        newRemoveBtn.addEventListener('click', () => {
+            const rows = tableBody.querySelectorAll('tr');
+            if (rows.length > 0) {
+                tableBody.removeChild(rows[rows.length - 1]);
+                const plan = Array.from(tableBody.querySelectorAll('tr')).map(row => {
+                    const inputs = row.querySelectorAll('input');
+                    return { time: inputs[0].value, activity: inputs[1].value };
+                });
+                handleScheduleSave(plan);
+                updateDynamicHeight();
+            }
+        });
+    }
+
+    const updateDynamicHeight = () => {
+        const rows = tableBody.querySelectorAll('tr').length;
+        if (rows === 0) {
+            container.style.flex = '0 0 auto';
+            container.style.height = '0px';
+            container.style.minHeight = '0px';
+            container.style.marginBottom = '0px';
+            container.style.overflow = 'hidden';
+        } else {
+            container.style.flex = ''; // Restore flex
+            container.style.height = ''; 
+            container.style.minHeight = '100px';
+            container.style.marginBottom = '12px';
+            container.style.overflow = 'auto';
+        }
+    };
 
     tableBody.innerHTML = '';
-    tableBody.appendChild(createRow('09:00', '기상 및 조식'));
-    tableBody.appendChild(createRow('11:00', '이동'));
+    try {
+        const data = await BackendHooks.fetchSchedule(sessionId, dateKey);
+        const savedPlan = data.plan || [];
+        if (savedPlan.length > 0) {
+            savedPlan.forEach(p => tableBody.appendChild(createRow(p.time, p.activity)));
+        }
+        updateDynamicHeight();
+    } catch (e) {
+        console.error("Failed to load schedule:", e);
+        updateDynamicHeight();
+    }
   },
 
   initResizers(elements, config) {
@@ -296,14 +396,17 @@ export const SidebarManager = {
         config[configKey] = newWidth;
       });
 
-      document.addEventListener('mouseup', () => {
+      document.addEventListener('mouseup', async () => {
         if (!isDragging) return;
         isDragging = false;
         target.classList.remove('notransition');
         resizer.classList.remove('active');
         elements.documentBody.style.userSelect = '';
         elements.documentBody.style.cursor = '';
-        localStorage.setItem(side === 'left' ? 'leftSidebarCustomWidth' : 'rightSidebarCustomWidth', config[configKey]);
+        
+        const key = side === 'left' ? 'leftSidebarCustomWidth' : 'rightSidebarCustomWidth';
+        await BackendHooks.saveUserSetting(key, config[configKey]);
+        
         if (side === 'right' && window.kakaoMap) window.kakaoMap.relayout();
       });
     };

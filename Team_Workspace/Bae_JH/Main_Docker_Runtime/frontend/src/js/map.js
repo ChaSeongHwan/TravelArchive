@@ -42,6 +42,8 @@ script.onload = () => {
       });
 
     function addLocationButton(map, container) {
+      let currentLocationMarker = null;
+
       const btn = document.createElement('button');
       btn.id = 'location-btn';
       btn.title = '내 위치 보기';
@@ -61,7 +63,11 @@ script.onload = () => {
           const locPos = new kakao.maps.LatLng(lat, lng);
           map.setCenter(locPos);
           map.setLevel(3);
-          new kakao.maps.Marker({ position: locPos, map: map });
+
+          if (currentLocationMarker) {
+            currentLocationMarker.setMap(null);
+          }
+          currentLocationMarker = new kakao.maps.Marker({ position: locPos, map: map });
         };
 
         const handleIPFallback = () => {
@@ -72,6 +78,12 @@ script.onload = () => {
                 const locPos = new kakao.maps.LatLng(data.latitude, data.longitude);
                 map.setCenter(locPos);
                 map.setLevel(5); // IP 기반이므로 조금 덜 확대
+
+                if (currentLocationMarker) {
+                  currentLocationMarker.setMap(null);
+                }
+                currentLocationMarker = new kakao.maps.Marker({ position: locPos, map: map });
+                
                 alert('현재 접속 환경이 보안 연결(HTTPS)이 아니어서 IP 기반 대략적인 위치로 이동합니다.');
               }
             });

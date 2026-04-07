@@ -12,6 +12,7 @@ import messageHtml from '../html/fragments/message.html?raw';
 import loadingHtml from '../html/fragments/loading.html?raw';
 import calendarHtml from '../html/fragments/calendar.html?raw';
 import scheduleHtml from '../html/fragments/schedule.html?raw';
+import userSearchHtml from '../html/fragments/user_search.html?raw';
 
 export const Templates = {
   settings: settingsHtml,
@@ -21,5 +22,6 @@ export const Templates = {
   message: messageHtml,
   loading: loadingHtml,
   calendar: calendarHtml,
-  schedule: scheduleHtml
+  schedule: scheduleHtml,
+  user_search: userSearchHtml
 };
