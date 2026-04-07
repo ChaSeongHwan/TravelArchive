@@ -52,6 +52,7 @@ current_active_session_id: Optional[str] = None
 # ==========================================
 class SessionCreateRequest(BaseModel):
     first_message: str
+    mode: str = "personal"
 
 class MessageRequest(BaseModel):
     message: str
@@ -62,18 +63,83 @@ class ThemeRequest(BaseModel):
 class TitleUpdateRequest(BaseModel):
     title: str
 
+class LoginRequest(BaseModel):
+    id: str
+    pw: str
+
+class SignUpRequest(BaseModel):
+    username: str
+    email: str
+    password: str
+
+class SessionModeUpdateRequest(BaseModel):
+    mode: str
+
+class InviteRequest(BaseModel):
+    user: str
+
+class MapMarkersRequest(BaseModel):
+    markers: List[Dict]
+
+class MemoRequest(BaseModel):
+    memo: str
+
+class PlanRequest(BaseModel):
+    plan: List[Dict]
+
 # ==========================================
 # API 라우터
 # ==========================================
 
+# --- 인증 API (Auth) ---
+@app.post("/api/auth/login")
+async def login(req: LoginRequest):
+    return {"status": "success", "user": {"id": req.id, "name": "Test User"}}
+
+@app.post("/api/auth/guest")
+async def guest_login():
+    return {"status": "success", "user": {"id": "guest", "name": "Guest"}}
+
+@app.post("/api/auth/social/{provider}")
+async def social_login(provider: str):
+    return {"status": "success", "redirect": f"/auth/{provider}"}
+
+@app.post("/api/auth/signup")
+async def signup(req: SignUpRequest):
+    return {"status": "success", "message": "Sign up completed"}
+
+@app.post("/api/auth/find")
+async def find_account():
+    return {"status": "success", "message": "Find account link sent"}
+
+# --- 컨텍스트 및 설정 ---
+@app.get("/api/context")
+async def get_app_context():
+    from datetime import date
+    return {
+        "today": date.today().isoformat(),
+        "settings": {
+            "appGlassOpacity": "20",
+            "leftSidebarCustomWidth": 300,
+            "rightSidebarCustomWidth": 300,
+            "theme": "default"
+        }
+    }
+
+@app.post("/api/settings/update")
+async def update_settings(settings: Dict[str, str]):
+    print(f"[Backend] 설정 업데이트 수신: {settings}")
+    return {"status": "success"}
+
+# --- 세션 관리 ---
 @app.get("/api/sessions")
-async def get_session_list():
-    """과거 세션 목록 데이터를 요청합니다."""
+async def get_session_list(mode: str = "personal"):
+    """과거 세션 목록 데이터를 요청합니다. (mode 파라미터 지원)"""
     return await mock_db_get_session_list()
 
 @app.post("/api/sessions")
 async def create_session(req: SessionCreateRequest):
-    """새 세션 생성 요청을 처리하고 컨테이너를 초기화합니다."""
+    """새 세션 생성 요청을 처리합니다. (mode 지원)"""
     global current_active_session_id
     
     if current_active_session_id and current_active_session_id in active_sessions:
@@ -94,6 +160,49 @@ async def create_session(req: SessionCreateRequest):
     current_active_session_id = new_id
     
     return new_session_data
+
+@app.put("/api/sessions/{session_id}/mode")
+async def update_session_mode(session_id: str, req: SessionModeUpdateRequest):
+    print(f"[Backend] 세션 {session_id} 모드 변경: {req.mode}")
+    return {"success": True, "mode": req.mode}
+
+@app.post("/api/sessions/{session_id}/invite")
+async def invite_user(session_id: str, req: InviteRequest):
+    print(f"[Backend] 세션 {session_id} 유저 초대: {req.user}")
+    return {"success": True, "user": req.user}
+
+@app.post("/api/sessions/{session_id}/share")
+async def share_chat(session_id: str):
+    return {"success": True, "share_url": f"http://localhost/share/{session_id}"}
+
+# --- 지도 및 캘린더/플래너 ---
+@app.post("/api/sessions/{session_id}/map/markers")
+async def save_map_markers(session_id: str, req: MapMarkersRequest):
+    return {"success": True}
+
+@app.get("/api/sessions/{session_id}/map/markers")
+async def get_map_markers(session_id: str):
+    return {"markers": []}
+
+@app.put("/api/sessions/{session_id}/memo")
+async def save_memo(session_id: str, date: str, req: MemoRequest):
+    return {"success": True}
+
+@app.get("/api/sessions/{session_id}/memo")
+async def get_memo(session_id: str, date: str):
+    return {"memo": ""}
+
+@app.put("/api/sessions/{session_id}/plan")
+async def save_plan(session_id: str, date: str, req: PlanRequest):
+    return {"success": True}
+
+@app.get("/api/sessions/{session_id}/plan")
+async def get_plan(session_id: str, date: str):
+    return {"plan": []}
+
+@app.get("/api/sessions/{session_id}/indicators")
+async def get_indicators(session_id: str, year: int, month: int):
+    return []
 
 @app.get("/api/sessions/{session_id}/history")
 async def get_chat_history(session_id: str):
