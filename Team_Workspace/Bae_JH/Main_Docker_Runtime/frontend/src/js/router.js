@@ -7,6 +7,7 @@ import { renderAccountPage } from './account.js';
 import { renderHelpPage } from './help.js';
 import { BackendHooks } from './api.js';
 import { SidebarManager } from './sidebar.js';
+import { CalendarManager } from './calendar.js';
 import { showLoadingIndicator, removeLoadingIndicator, appendMessage, adjustTextareaHeight } from './ui.js';
 
 const PAGES = {
@@ -24,7 +25,8 @@ export function switchView(viewName, elements) {
     pageSection, 
     topBarActions,
     downloadChatBtn,
-    shareChatBtn
+    shareChatBtn,
+    mapToggleBtn
   } = elements;
   
   // Reset all to none
@@ -41,17 +43,21 @@ export function switchView(viewName, elements) {
       chatWrap.style.display = 'block';
       if (downloadChatBtn) downloadChatBtn.style.display = 'none';
       if (shareChatBtn) shareChatBtn.style.display = 'none';
+      if (mapToggleBtn) mapToggleBtn.style.display = 'none'; // Fix Item 12: Ensure hidden on home
       break;
     case 'chat':
       chatHistory.style.display = 'flex';
       chatWrap.style.display = 'block';
       if (downloadChatBtn) downloadChatBtn.style.display = 'flex';
       if (shareChatBtn) shareChatBtn.style.display = 'flex';
+      if (mapToggleBtn) mapToggleBtn.style.display = 'flex'; // Fix Item 12: Only show on chat
       break;
     case 'page':
       pageSection.style.display = 'flex';
+      chatWrap.style.display = 'none'; // Fix Item 6: Ensure hidden on pages
       if (downloadChatBtn) downloadChatBtn.style.display = 'none';
       if (shareChatBtn) shareChatBtn.style.display = 'none';
+      if (mapToggleBtn) mapToggleBtn.style.display = 'none'; // Fix Item 12: Ensure hidden on pages
       break;
   }
 }
@@ -69,6 +75,7 @@ export async function router(state, elements) {
       state.currentSessionId = ssid;
       
       // Refresh date-specific data
+      CalendarManager.loadTripRange(ssid);
       SidebarManager.initMemoRows(elements);
       SidebarManager.initScheduleRows(elements);
 
@@ -92,6 +99,7 @@ export async function router(state, elements) {
   state.currentSessionId = null;
 
   // Refresh date-specific data
+  CalendarManager.loadTripRange(null);
   SidebarManager.initMemoRows(elements);
   SidebarManager.initScheduleRows(elements);
 

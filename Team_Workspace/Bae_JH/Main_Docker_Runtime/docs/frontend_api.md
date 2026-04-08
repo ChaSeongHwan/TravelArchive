@@ -37,6 +37,8 @@
 | `saveMemo` | PUT | `/api/sessions/${id}/memo` | `memo`, `date` | 특정 날짜의 메모 내용 저장 |
 | `fetchSchedule` | GET | `/api/sessions/${id}/plan` | `date` (dateKey) | 특정 날짜의 일정(Plan) 목록 조회 |
 | `updateSchedule` | PUT | `/api/sessions/${id}/plan` | `plan`, `date` | 특정 날짜의 일정(Plan) 목록 저장 |
+| `fetchTripRange` | GET | `/api/sessions/${id}/trip_range`| - | 세션의 여행 기간(핀) 설정 조회 |
+| `saveTripRange` | PUT | `/api/sessions/${id}/trip_range`| `startDate`, `length` | 세션의 여행 기간(핀) 설정 저장 |
 
 ## 4. 지도 데이터 관리 (`/api/sessions/.../map`)
 
@@ -58,4 +60,4 @@
 | `fetchCurrentWeather` | GET | `/api/weather` | - | 현재 날씨 상태 및 물리 효과 파라미터 조회 |
 
 ---
-*Last Updated: 2026-04-07*
+*Last Updated: 2026-04-08*

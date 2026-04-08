@@ -44,6 +44,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     calendarHeaderControls: document.getElementById('calendarHeaderControls'),
     toggleCalendarBtn: document.getElementById('toggleCalendarBtn'),
     calendarContent: document.getElementById('calendarContent'),
+    pinRangeBtn: document.getElementById('pinRangeBtn'),
     toggleScheduleBtn: document.getElementById('toggleScheduleBtn'),
     scheduleContent: document.getElementById('scheduleContent'),
     addScheduleRowBtn: document.getElementById('addScheduleRowBtn'),
@@ -113,29 +114,27 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 3. Parallel Async Initialization (Don't block UI event listeners)
   (async () => {
     try {
-      await Promise.all([
-        SessionManager.init(elements, state),
-        CalendarManager.init(todayDate),
-        CalendarManager.render(elements.calendarContent)
-      ]);
-      ScheduleManager.render(elements.scheduleContent);
+      await SessionManager.init(elements, state);
+      await CalendarManager.init(todayDate);
+      await CalendarManager.render(elements.calendarContent);
+      await ScheduleManager.render(elements.scheduleContent);
+      
+      // Fix Item 3: Initialize folding & rows after calendar/schedule is fully ready
+      SidebarManager.initTabs(elements);
+      SidebarManager.initResizers(elements, config);
+      SidebarManager.initFolding(elements);
+      ThemeManager.init(elements);
+      
+      // Initial routing after full init
+      router(state, elements);
     } catch (e) {
       console.warn("Some async components failed to load, UI will still function", e);
     }
   })();
 
-  SidebarManager.initTabs(elements);
-  SidebarManager.initResizers(elements, config);
-  SidebarManager.initFolding(elements);
-  ThemeManager.init(elements);
-
-  // Initial Routing
+  // Initial Routing Listener
   window.addEventListener('hashchange', () => router(state, elements));
-  router(state, elements);
-
-  // Default display
-  elements.chatWrap.classList.remove('hidden');
-  elements.chatWrap.style.display = 'block';
+  // router(state, elements); // Moved inside async init block to prevent race condition on SSID/Rows
 
   // 4. Unified Event Handling
   const handleSidebarToggle = (btn, side) => {
@@ -151,8 +150,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                        : (side === 'left' ? SidebarManager.closeSidebar(elements) : SidebarManager.closeRightSidebar(elements));
       }
       
+      window.updatePlaceholder();
       // Sidebar transition takes ~300ms
-      setTimeout(() => SidebarManager.adjustAllMemoHeights(), 310);
+      setTimeout(() => {
+        SidebarManager.adjustAllMemoHeights();
+        window.updatePlaceholder();
+      }, 310);
     });
   };
 
@@ -228,6 +231,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   elements.expandBtn.addEventListener('click', () => {
     elements.chatBox.classList.toggle('expanded');
     adjustTextareaHeight(elements.chatInput, elements.chatBox);
+    window.updatePlaceholder();
   });
 
   elements.attachBtn.addEventListener('click', () => elements.fileInput.click());
@@ -237,20 +241,58 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Window utilities
   window.updatePlaceholder = () => {
-    const boxWidth = elements.chatBox?.offsetWidth || 0;
-    if (boxWidth < 500) {
-      elements.chatInput.placeholder = "메시지를 입력하세요";
+    if (!elements.chatInput) return;
+    const longText = "메시지 또는 파일을 이곳에 드롭하세요 (Shift+Enter로 줄바꿈)";
+    const shortText = "메시지를 입력하세요";
+    
+    const canvas = window.updatePlaceholder.canvas || (window.updatePlaceholder.canvas = document.createElement("canvas"));
+    const context = canvas.getContext("2d");
+    
+    // Get exact styles from the textarea to match measurement
+    const computedStyle = window.getComputedStyle(elements.chatInput);
+    context.font = `${computedStyle.fontWeight} ${computedStyle.fontSize} ${computedStyle.fontFamily}`;
+    
+    // Precision measurement + buffer to account for scrollbars or slightly different rendering
+    const textWidth = context.measureText(longText).width;
+    const availableWidth = elements.chatInput.clientWidth - parseFloat(computedStyle.paddingLeft) - parseFloat(computedStyle.paddingRight);
+    
+    // If available width is less than the actual text width + 40px safety buffer, switch to short.
+    if (availableWidth < textWidth + 40) {
+      elements.chatInput.placeholder = shortText;
     } else {
-      elements.chatInput.placeholder = "메시지 또는 파일을 이곳에 드롭하세요 (Shift+Enter로 줄바꿈)";
+      elements.chatInput.placeholder = longText;
     }
   };
 
   window.addEventListener('resize', () => {
     adjustTextareaHeight(elements.chatInput, elements.chatBox);
     window.updatePlaceholder();
+    
     if (!SidebarManager.isMobile()) {
-      SidebarManager.closeSidebar(elements, { silent: true });
-      SidebarManager.closeRightSidebar(elements, { silent: true });
+        const MIN_CONTENT = 600; 
+        const MAX_SIDEBAR_PCT = 0.5;
+        const leftOpen = !elements.sidebar.classList.contains('collapsed');
+        const rightOpen = !elements.rightSidebar.classList.contains('collapsed');
+        
+        // 1. Force 50% constraint on resize
+        if (leftOpen && config.currentLeftWidth > window.innerWidth * MAX_SIDEBAR_PCT) {
+            elements.sidebar.style.width = (window.innerWidth * MAX_SIDEBAR_PCT) + 'px';
+        }
+        if (rightOpen && config.currentRightWidth > window.innerWidth * MAX_SIDEBAR_PCT) {
+            elements.rightSidebar.style.width = (window.innerWidth * MAX_SIDEBAR_PCT) + 'px';
+        }
+
+        const leftWidth = leftOpen ? parseFloat(elements.sidebar.style.width || config.currentLeftWidth) : 0;
+        const rightWidth = rightOpen ? parseFloat(elements.rightSidebar.style.width || config.currentRightWidth) : 0;
+        
+        // 2. Enforce minimum center width
+        if (leftWidth + rightWidth > window.innerWidth - MIN_CONTENT) {
+            if (leftOpen && rightOpen) {
+                SidebarManager.closeRightSidebar(elements, { silent: true });
+            } else if (leftOpen && leftWidth > window.innerWidth - MIN_CONTENT) {
+                elements.sidebar.style.width = Math.max(300, window.innerWidth - MIN_CONTENT) + 'px';
+            }
+        }
     }
     SidebarManager.syncContentState(elements);
     SidebarManager.adjustAllMemoHeights();

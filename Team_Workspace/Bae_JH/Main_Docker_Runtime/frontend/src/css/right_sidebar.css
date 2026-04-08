@@ -91,11 +91,11 @@
   position: absolute;
   top: 0;
   left: 0 !important;
-  width: 8px;
+  width: 10px; /* Slightly wider for better hit area */
   height: 100%;
   cursor: col-resize;
   background-color: transparent;
-  z-index: 9999;
+  z-index: 99999; /* Highest priority */
   transition: background-color 0.2s ease;
 }
 

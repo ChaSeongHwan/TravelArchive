@@ -76,11 +76,20 @@
           <div class="calendar-container">
             <div class="section-header">
               <div class="section-subtitle">달력</div>
-              <button class="section-toggle-btn" id="toggleCalendarBtn" title="접기/펴기">
-                <svg class="toggle-icon" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
-              </button>
+              <div class="flex items-center gap-8">
+                <button class="row-action-btn" id="prevMonthBtnHeader" title="일수 감소">-</button>
+                <button class="row-action-btn" id="pinRangeBtn" title="일정 고정">
+                  <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                  </svg>
+                </button>
+                <button class="row-action-btn" id="nextMonthBtnHeader" title="일수 증가">+</button>
+                <button class="section-toggle-btn" id="toggleCalendarBtn" title="접기/펴기">                  <svg class="toggle-icon" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </button>
+              </div>
             </div>
             <div class="calendar-placeholder" id="calendarContent">
               <!-- Rendered via js/calendar.js -->

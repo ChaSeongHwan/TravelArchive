@@ -6,7 +6,7 @@
   --text-main: #111827;
   --text-muted: rgba(31, 41, 55, 0.6);
   --glass-bg: rgba(255, 255, 255, var(--app-glass-opacity, 0.14));
-  --sidebar-glass-opacity: calc(var(--app-glass-opacity) + 0.12); /* 본문보다 더 불투명하게 */
+  --sidebar-glass-opacity: calc(var(--app-glass-opacity) + 0.20); /* 본문보다 더 불투명하게 */
   --sidebar-bg: rgba(255, 255, 255, var(--sidebar-glass-opacity));
   --glass-border: rgba(255, 255, 255, 0.34);
   
@@ -46,6 +46,7 @@ body {
    커스텀 스크롤바
    ========================================================== */
 .sidebar-list::-webkit-scrollbar,
+.calendar-container::-webkit-scrollbar,
 .schedule-list-container::-webkit-scrollbar,
 .memo-list-container::-webkit-scrollbar,
 .chat-history::-webkit-scrollbar,
@@ -56,6 +57,7 @@ body {
 }
 
 .sidebar-list::-webkit-scrollbar-track,
+.calendar-container::-webkit-scrollbar-track,
 .schedule-list-container::-webkit-scrollbar-track,
 .memo-list-container::-webkit-scrollbar-track,
 .chat-history::-webkit-scrollbar-track,
@@ -65,6 +67,7 @@ body {
 }
 
 .sidebar-list::-webkit-scrollbar-thumb,
+.calendar-container::-webkit-scrollbar-thumb,
 .schedule-list-container::-webkit-scrollbar-thumb,
 .memo-list-container::-webkit-scrollbar-thumb,
 .chat-history::-webkit-scrollbar-thumb,
@@ -75,6 +78,7 @@ body {
 }
 
 .sidebar-list:hover::-webkit-scrollbar-thumb,
+.calendar-container:hover::-webkit-scrollbar-thumb,
 .schedule-list-container:hover::-webkit-scrollbar-thumb,
 .memo-list-container:hover::-webkit-scrollbar-thumb,
 .chat-history:hover::-webkit-scrollbar-thumb,
@@ -85,6 +89,7 @@ body {
 
 /* 스크롤바 다크모드 대응 */
 body[data-theme="dark"] .sidebar-list:hover::-webkit-scrollbar-thumb,
+body[data-theme="dark"] .calendar-container:hover::-webkit-scrollbar-thumb,
 body[data-theme="dark"] .schedule-list-container:hover::-webkit-scrollbar-thumb,
 body[data-theme="dark"] .memo-list-container:hover::-webkit-scrollbar-thumb,
 body[data-theme="dark"] .chat-history:hover::-webkit-scrollbar-thumb,
@@ -94,6 +99,7 @@ body[data-theme="dark"] .page-section:hover::-webkit-scrollbar-thumb {
 }
 
 body[data-theme="dark"] .sidebar-list::-webkit-scrollbar-thumb:active,
+body[data-theme="dark"] .calendar-container::-webkit-scrollbar-thumb:active,
 body[data-theme="dark"] .schedule-list-container::-webkit-scrollbar-thumb:active,
 body[data-theme="dark"] .memo-list-container::-webkit-scrollbar-thumb:active,
 body[data-theme="dark"] .chat-history::-webkit-scrollbar-thumb:active,
@@ -111,6 +117,10 @@ body[data-theme="dark"] .page-section::-webkit-scrollbar-thumb:active {
 
 .flex {
   display: flex !important;
+}
+
+.items-center {
+  align-items: center !important;
 }
 
 .flex-between {
@@ -137,6 +147,24 @@ body[data-theme="dark"] .page-section::-webkit-scrollbar-thumb:active {
 .m-0 { margin: 0 !important; }
 .mt-10 { margin-top: 10px !important; }
 .fs-13 { font-size: 13px !important; }
+
+.btn-icon-small {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.btn-icon-small:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
 
 /* ==========================================================
    MODALS & OVERLAYS

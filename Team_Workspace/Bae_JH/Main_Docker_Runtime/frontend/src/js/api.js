@@ -345,6 +345,36 @@ export const BackendHooks = {
   },
 
   /**
+   * saves the trip range (start date and length) for a specific session.
+   */
+  async saveTripRange(sessionId, startDate, length) {
+    try {
+      const res = await fetch(`/api/sessions/${sessionId}/trip_range`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ start_date: startDate, length })
+      });
+      return await res.json();
+    } catch (error) {
+      console.error("API Error (saveTripRange):", error);
+    }
+  },
+
+  /**
+   * fetches the trip range for a specific session.
+   */
+  async fetchTripRange(sessionId) {
+    try {
+      if (!sessionId || sessionId === 'default') return { start_date: null, length: 0 };
+      const res = await fetch(`/api/sessions/${sessionId}/trip_range`);
+      if (!res.ok) return { start_date: null, length: 0 };
+      return await res.json();
+    } catch (error) {
+      return { start_date: null, length: 0 };
+    }
+  },
+
+  /**
    * uploads files to a specific session.
    */
   async uploadFiles(sessionId, files) {

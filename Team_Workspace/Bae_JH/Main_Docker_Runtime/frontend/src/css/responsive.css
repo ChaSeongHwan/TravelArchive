@@ -34,6 +34,7 @@
   .sidebar {
     width: 240px;
     padding: 18px 8px 18px 14px !important; 
+    z-index: 100; /* Ensure it stays above content when open */
   }
 
   .sidebar-header {
@@ -57,6 +58,19 @@
   .right-sidebar {
     width: 400px;
     padding: 18px 14px;
+    z-index: 45; /* Ensure it stays above content */
+  }
+
+  /* Tablet Content Constraint */
+  body.left-open .content,
+  body.right-open .content {
+    opacity: 0.35;
+    filter: blur(2px);
+    pointer-events: none;
+  }
+
+  body.left-open.right-open .content {
+    opacity: 0.1;
   }
 
   .sidebar-title {
@@ -77,6 +91,14 @@
 
   .page-section p {
     font-size: 16px;
+  }
+
+  .chat-history {
+    padding: 24px 32px;
+  }
+
+  .chat-wrap {
+    padding: 0 32px 26px 32px;
   }
 
   .top-bar {
@@ -137,9 +159,10 @@
     z-index: 50;
     border-right: none;
     border-radius: 20px 0 0 20px;
-    background: rgba(255, 255, 255, 0.82);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    /* Fix Item 11: Consistent transparency with monitor */
+    background: rgba(255, 255, 255, var(--app-glass-opacity, 0.92));
+    backdrop-filter: blur(var(--sidebar-blur, 55px));
+    -webkit-backdrop-filter: blur(var(--sidebar-blur, 55px));
     box-shadow: 4px 0 24px rgba(0, 0, 0, 0.12);
     white-space: nowrap;
     overflow: hidden !important;
@@ -180,9 +203,10 @@
     z-index: 50;
     border-left: none;
     border-radius: 20px 0 0 20px;
-    background: rgba(255, 255, 255, 0.82);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    /* Fix Item 11: Consistent transparency with monitor */
+    background: rgba(255, 255, 255, var(--app-glass-opacity, 0.92));
+    backdrop-filter: blur(var(--sidebar-blur, 55px));
+    -webkit-backdrop-filter: blur(var(--sidebar-blur, 55px));
     box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12);
     white-space: nowrap;
     overflow: hidden !important;
@@ -351,12 +375,20 @@
 
   body[data-theme="dark"] .sidebar,
   body[data-theme="dark"] .right-sidebar {
-    background: rgba(17, 24, 39, 1);
+    background: rgba(17, 24, 39, 0.98); 
+    border-color: rgba(255, 255, 255, 0.1);
   }
 
-  body.left-open .content.content-obscured,
-  body.right-open .content.content-obscured {
-    opacity: 0;
+  /* Improve mobile tap targets */
+  .section-toggle-btn, .row-action-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+  }
+
+  /* Mobile Safe Area Padding */
+  .sidebar-footer {
+    padding-bottom: calc(12px + env(safe-area-inset-bottom)) !important;
   }
 
   .sidebar-header {
@@ -388,7 +420,7 @@
     padding: 12px 10px !important;
     margin-right: 6px !important;
     width: calc(100% - 6px) !important;
-    background: rgba(255, 255, 255, 0.78);
+    background: rgba(255, 255, 255, var(--sidebar-glass-opacity, 0.65));
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
   }

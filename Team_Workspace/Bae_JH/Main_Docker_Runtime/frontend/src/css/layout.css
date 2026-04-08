@@ -1,3 +1,13 @@
+:root {
+  --app-glass-opacity: 0.70; /* 기준 x (설정창 글래스모피즘 그 자체) */
+  --glass-level-1: calc(var(--app-glass-opacity) + 0.10); /* x + 10.0% (사이드바, 말풍선 등) */
+  --glass-level-2: calc(var(--app-glass-opacity) + 0.16); /* x + 16.0% (탭, 세션, 실제 입력칸 등) */
+  --glass-blur: 40px; 
+  --sidebar-blur: 45px;
+  --transition-speed: 0.3s;
+  --transition-ease: ease;
+}
+
 /* ==========================================================
    BACKGROUND (기본 배경 씬)
    ========================================================== */
@@ -127,7 +137,9 @@
   flex-direction: column;
   align-items: center;
   position: relative;
-  padding: 0;
+  padding: 0 40px; /* 사이드바와의 여백 확보 (기존 0) */
+  overflow-y: auto; 
+  overflow-x: hidden;
   transition: width 0.3s ease, opacity 0.25s ease, filter 0.25s ease;
 }
 
@@ -171,7 +183,7 @@
 }
 
 .menu-btn {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.40);
   border: 1px solid rgba(255, 255, 255, 0.4);
   color: rgba(17, 24, 39, 0.8);
   cursor: pointer;
@@ -195,7 +207,7 @@
 }
 
 .top-action-btn {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.40);
   border: 1px solid rgba(255, 255, 255, 0.4);
   color: rgba(17, 24, 39, 0.8);
   cursor: pointer;

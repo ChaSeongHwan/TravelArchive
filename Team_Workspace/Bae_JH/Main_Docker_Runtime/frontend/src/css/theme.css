@@ -20,10 +20,10 @@ body[data-theme="weather"] .bg-gradient {
 }
 
 body[data-theme="weather"] .main-panel {
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(10px); 
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, var(--app-glass-opacity, 0.96));
+  backdrop-filter: blur(15px); 
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
 }
 
 .cloud-particle {

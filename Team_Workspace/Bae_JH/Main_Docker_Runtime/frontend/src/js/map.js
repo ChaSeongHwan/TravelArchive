@@ -29,6 +29,16 @@ script.onload = () => {
           level: 8 // Regional view
         });
 
+        // Fix Item 13: Expose map and center to parent for resizing logic
+        if (window.parent) {
+          window.parent.kakaoMap = map;
+          window.parent.kakaoMapCenter = map.getCenter();
+          
+          kakao.maps.event.addListener(map, 'center_changed', () => {
+            window.parent.kakaoMapCenter = map.getCenter();
+          });
+        }
+
         addLocationButton(map, container);
         setupMapListeners(map);
       })
@@ -37,6 +47,17 @@ script.onload = () => {
           center: defaultPos,
           level: 8
         });
+
+        // Fix Item 13: Expose map and center to parent
+        if (window.parent) {
+          window.parent.kakaoMap = map;
+          window.parent.kakaoMapCenter = map.getCenter();
+
+          kakao.maps.event.addListener(map, 'center_changed', () => {
+            window.parent.kakaoMapCenter = map.getCenter();
+          });
+        }
+
         addLocationButton(map, container);
         setupMapListeners(map);
       });
@@ -104,26 +125,39 @@ script.onload = () => {
     }
 
     function setupMapListeners(map) {
-      /**
-       * Listen for messages from the parent window (index.html).
-       * Used to update the map view based on chat interactions.
-       */
+      let activeMarkerPos = null; 
+      let lastValidCenter = map.getCenter();
+
+      // Track center changes to always have a fallback for re-centering
+      kakao.maps.event.addListener(map, 'center_changed', () => {
+          lastValidCenter = map.getCenter();
+          if (window.parent) window.parent.kakaoMapCenter = lastValidCenter;
+      });
+
       window.addEventListener('message', (e) => {
         const { type, lat, lng, title } = e.data;
 
         if (type === 'MOVE_TO') {
           const pos = new kakao.maps.LatLng(lat, lng);
-          
-          // Move the map center to the specified position
+          activeMarkerPos = pos; 
           map.setCenter(pos);
-          map.setLevel(3); // Zoom in for specific location
+          map.setLevel(3); 
 
-          // Add a marker and show an info window
           const marker = new kakao.maps.Marker({ position: pos, map });
           const infoWindow = new kakao.maps.InfoWindow({
             content: `<div style="padding:6px 10px;font-size:13px;color:#333;">${title}</div>`
           });
           infoWindow.open(map, marker);
+        } else if (type === 'relayout') {
+          // Just adjust container size during move. DO NOT call setCenter here to prevent drifting.
+          map.relayout();
+        } else if (type === 'recenter') {
+          // Final centering ONLY when resizing is finished (mouseup)
+          map.relayout();
+          const targetPos = activeMarkerPos || lastValidCenter;
+          if (targetPos) {
+              map.setCenter(targetPos);
+          }
         }
       });
     }

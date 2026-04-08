@@ -4,10 +4,10 @@
 .chat-history {
   display: none;
   width: 100%;
-  max-width: 860px;
+  max-width: 920px;
   flex: 1;
   overflow-y: auto;
-  padding: 0 24px;
+  padding: 24px; 
   flex-direction: column;
   gap: 24px;
   margin-bottom: 20px;
@@ -45,41 +45,103 @@
 }
 
 .message.bot {
-  background: rgba(255, 255, 255, var(--app-glass-opacity, 0.4));
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, var(--glass-level-1, 0.80)); 
+  backdrop-filter: blur(var(--glass-blur, 40px));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 40px));
+  border: 1px solid rgba(255, 255, 255, 0.4);
   color: #111827;
   border-bottom-left-radius: 6px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.12);
   font-family: inherit;
   white-space: normal;
 }
 
 .message.bot p {
   margin: 0;
+  line-height: 1.6;
 }
 
 .message.bot p + p {
-  margin-top: 8px;
+  margin-top: 12px;
+}
+
+/* Item 15: Markdown Styling */
+.message.bot h1, .message.bot h2, .message.bot h3 {
+  margin: 1.2em 0 0.6em;
+  font-weight: 800;
+  color: #000;
+  line-height: 1.3;
+}
+
+.message.bot h1 { 
+  font-size: 1.45em; 
+  border-bottom: 2px solid rgba(0,0,0,0.08); 
+  padding-bottom: 6px; 
+}
+.message.bot h2 { 
+  font-size: 1.25em; 
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  padding-bottom: 4px;
+}
+.message.bot h3 { font-size: 1.15em; }
+
+.message.bot ul, .message.bot ol {
+  margin: 10px 0;
+  padding-left: 24px;
+}
+
+.message.bot li {
+  margin-bottom: 6px;
+  line-height: 1.5;
+}
+
+.message.bot ul li {
+  list-style-type: disc;
+}
+
+.message.bot ol li {
+  list-style-type: decimal;
+}
+
+.message.bot blockquote {
+  margin: 16px 0;
+  padding: 8px 16px;
+  border-left: 4px solid rgba(59, 130, 246, 0.8);
+  background: rgba(59, 130, 246, 0.05);
+  color: rgba(31, 41, 55, 0.9);
+  font-style: italic;
+  border-radius: 4px;
 }
 
 .message.bot pre {
-  background: rgba(0, 0, 0, 0.05);
-  padding: 12px;
-  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.06);
+  padding: 16px;
+  border-radius: 14px;
   overflow-x: auto;
+  margin: 14px 0;
+  border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .message.bot code {
-  background: rgba(0, 0, 0, 0.05);
-  padding: 2px 4px;
-  border-radius: 4px;
-  font-family: monospace;
+  background: rgba(59, 130, 246, 0.1);
+  color: #1d4ed8;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-family: 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 0.9em;
+  font-weight: 600;
+}
+
+.message.bot pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  font-weight: 400;
 }
 
 .message.bot strong {
-  font-weight: bold;
+  font-weight: 800;
+  color: #000;
 }
 
 .message-actions {
@@ -132,8 +194,8 @@
 .chat-wrap {
   display: none;
   width: 100%;
-  max-width: 860px;
-  padding: 0 20px 26px 20px;
+  max-width: 920px;
+  padding: 0 24px 26px 24px; 
   flex-shrink: 0;
 }
 
@@ -145,7 +207,7 @@
   padding: 5px 10px;
   border-radius: 22px;
   border: 1px solid rgba(255, 255, 255, 0.28);
-  background: rgba(255, 255, 255, var(--sidebar-glass-opacity, 0.22));
+  background: rgba(255, 255, 255, var(--glass-level-1, 0.80)); 
   backdrop-filter: blur(30px);
   -webkit-backdrop-filter: blur(30px);
   box-shadow: 0 16px 48px rgba(24, 39, 75, 0.10);
@@ -182,7 +244,7 @@
   border: 1px solid transparent;
   border-radius: 18px;
   outline: none;
-  background: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, var(--glass-level-2, 0.90)); 
   color: rgba(17, 24, 39, 0.95);
   font-size: 15px;
   font-family: inherit;
@@ -201,6 +263,9 @@
 
 .chat-box textarea::placeholder {
   color: rgba(55, 65, 81, 0.66);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .chat-box textarea:focus {

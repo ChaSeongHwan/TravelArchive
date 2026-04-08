@@ -70,6 +70,8 @@
 | `fetchMemo` | `GET /api/sessions/{id}/memo` | Path: `id`, Query: `date` | `{memo: ""}` | 특정 날짜의 메모 조회 |
 | `updateSchedule` | `PUT /api/sessions/{id}/plan` | Path: `id`, Query: `date`, Body: `{plan: []}`| `{success}` | 특정 날짜의 여행 일정(Plan) 저장 |
 | `fetchSchedule` | `GET /api/sessions/{id}/plan` | Path: `id`, Query: `date` | `{plan: []}` | 특정 날짜의 여행 일정 조회 |
+| `saveTripRange` | `PUT /api/sessions/{id}/trip_range` | Path: `id`, Body: `{start_date, length}` | `{success}` | 세션의 여행 기간(핀) 설정 저장 |
+| `fetchTripRange` | `GET /api/sessions/{id}/trip_range` | Path: `id` | `{start_date, length}` | 세션의 여행 기간 설정 조회 |
 | `fetchMonthDataIndicators`| `GET /api/sessions/{id}/indicators`| Path: `id`, Query: `year, month`| `["YYYY-MM-DD", ...]` | 데이터가 있는 날짜 목록(점 표시용) |
 
 ---

@@ -60,4 +60,10 @@
 .btn-google { background: #fff; color: #1f2937; }
 .btn-kakao { background: #FEE500; color: #191919; }
 .btn-naver { background: #03C75A; color: #fff; }
-.btn-signup { background: rgba(59, 130, 246, 0.08); color: var(--primary-color); border-color: rgba(59, 130, 246, 0.15); }
+.btn-signup { 
+  background: rgba(59, 130, 246, 0.22); /* Increase opacity (0.08 -> 0.22) */
+  color: var(--primary-color); 
+  border: 1px solid rgba(59, 130, 246, 0.35); 
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}

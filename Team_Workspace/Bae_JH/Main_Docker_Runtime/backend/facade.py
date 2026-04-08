@@ -87,6 +87,17 @@ class MemoRequest(BaseModel):
 class PlanRequest(BaseModel):
     plan: List[Dict]
 
+class TripRangeRequest(BaseModel):
+    start_date: str
+    length: int
+
+# ==========================================
+# Mock DB Storage
+# ==========================================
+mock_trip_ranges: Dict[str, Dict] = {} # {session_id: {"start_date": "...", "length": 3}}
+mock_memos: Dict[str, Dict[str, str]] = {} # {session_id: {date_key: content}}
+mock_plans: Dict[str, Dict[str, List]] = {} # {session_id: {date_key: [plan_items]}}
+
 # ==========================================
 # API 라우터
 # ==========================================
@@ -184,25 +195,49 @@ async def save_map_markers(session_id: str, req: MapMarkersRequest):
 async def get_map_markers(session_id: str):
     return {"markers": []}
 
+@app.put("/api/sessions/{session_id}/trip_range")
+async def save_trip_range(session_id: str, req: TripRangeRequest):
+    mock_trip_ranges[session_id] = req.dict()
+    return {"success": True}
+
+@app.get("/api/sessions/{session_id}/trip_range")
+async def get_trip_range(session_id: str):
+    return mock_trip_ranges.get(session_id, {"start_date": None, "length": 0})
+
 @app.put("/api/sessions/{session_id}/memo")
 async def save_memo(session_id: str, date: str, req: MemoRequest):
+    if session_id not in mock_memos:
+        mock_memos[session_id] = {}
+    mock_memos[session_id][date] = req.memo
     return {"success": True}
 
 @app.get("/api/sessions/{session_id}/memo")
 async def get_memo(session_id: str, date: str):
-    return {"memo": ""}
+    memo = mock_memos.get(session_id, {}).get(date, "")
+    return {"memo": memo}
 
 @app.put("/api/sessions/{session_id}/plan")
 async def save_plan(session_id: str, date: str, req: PlanRequest):
+    if session_id not in mock_plans:
+        mock_plans[session_id] = {}
+    mock_plans[session_id][date] = req.plan
     return {"success": True}
 
 @app.get("/api/sessions/{session_id}/plan")
 async def get_plan(session_id: str, date: str):
-    return {"plan": []}
+    plan = mock_plans.get(session_id, {}).get(date, [])
+    return {"plan": plan}
 
 @app.get("/api/sessions/{session_id}/indicators")
 async def get_indicators(session_id: str, year: int, month: int):
-    return []
+    # 합산된 데이터가 존재하는 날짜 목록 추출
+    memo_dates = mock_memos.get(session_id, {}).keys()
+    plan_dates = mock_plans.get(session_id, {}).keys()
+    
+    unique_dates = list(set(list(memo_dates) + list(plan_dates)))
+    # 해당 년/월에 필터링된 결과만 반환
+    prefix = f"{year}-{month}-"
+    return [d for d in unique_dates if d.startswith(prefix)]
 
 @app.get("/api/sessions/{session_id}/history")
 async def get_chat_history(session_id: str):
