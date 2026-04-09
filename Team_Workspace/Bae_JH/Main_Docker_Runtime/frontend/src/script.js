@@ -297,6 +297,32 @@ document.addEventListener('DOMContentLoaded', async () => {
     SidebarManager.adjustAllMemoHeights();
   });
 
+  // 스크롤바 자동 숨김: 스크롤 중이거나 hover 시에만 표시, 1.5초 후 사라짐
+  const scrollbarTimers = new WeakMap();
+  const SCROLLBAR_HIDE_DELAY = 1500;
+  const SCROLLABLE_SELECTORS = [
+    '.sidebar-view', '.chat-history', '.page-section',
+    '.memo-inner-scroll', '.schedule-inner-scroll'
+  ];
+
+  document.addEventListener('scroll', (e) => {
+    const el = e.target;
+    if (!(el instanceof Element)) return;
+
+    // textarea는 부모(.chat-box)에 클래스를 붙임
+    const target = el.matches('textarea') ? el.closest('.chat-box') : el;
+    if (!target) return;
+
+    const isScrollable = SCROLLABLE_SELECTORS.some(sel => target.matches(sel)) || target.matches('textarea');
+    if (!isScrollable) return;
+
+    target.classList.add('scrollbar-active');
+    if (scrollbarTimers.has(target)) clearTimeout(scrollbarTimers.get(target));
+    scrollbarTimers.set(target, setTimeout(() => {
+      target.classList.remove('scrollbar-active');
+    }, SCROLLBAR_HIDE_DELAY));
+  }, true); // capture phase로 버블링 없는 scroll도 감지
+
   window.updatePlaceholder();
   adjustTextareaHeight(elements.chatInput, elements.chatBox);
   SidebarManager.syncContentState(elements);

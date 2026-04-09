@@ -4,6 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Travel Archive</title>
+  <!-- Dark Mode Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/assets/Logo_W.svg" media="(prefers-color-scheme: dark)" />
+  <!-- Light Mode Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/assets/Logo_B.svg" media="(prefers-color-scheme: light)" />
+  <!-- Fallback for browsers that don't support media queries in link tags -->
+  <link rel="shortcut icon" href="/assets/Logo_B.svg" />
   <link rel="stylesheet" href="/styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script type="module" src="/script.js"></script>
@@ -28,7 +34,10 @@
         
         <div class="sidebar-header">
           <div class="flex-between w-full">
-            <div class="sidebar-label cursor-pointer" id="homeBtn" title="메인으로 돌아가기">ARCHIVE</div>
+            <div class="sidebar-label cursor-pointer" id="homeBtn" title="메인으로 돌아가기">
+              <div class="sidebar-logo"></div>
+              <span>ARCHIVE</span>
+            </div>
             <button id="resetLeftSidebarBtn" class="close-right-btn" title="사이드바 크기 초기화">
               <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="1 4 1 10 7 10"></polyline>
@@ -117,11 +126,13 @@
               </div>
             </div>
             <div class="memo-list-container" id="memoContent">
-              <table class="schedule-table memo-table">
-                <tbody id="memoTableBody">
-                  <!-- Rendered via js/sidebar.js -->
-                </tbody>
-              </table>
+              <div class="memo-inner-scroll">
+                <table class="schedule-table memo-table">
+                  <tbody id="memoTableBody">
+                    <!-- Rendered via js/sidebar.js -->
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>

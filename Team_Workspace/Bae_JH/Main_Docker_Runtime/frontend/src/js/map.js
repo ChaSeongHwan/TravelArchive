@@ -16,6 +16,9 @@ script.onload = () => {
     const container = document.getElementById('map');
     const defaultPos = new kakao.maps.LatLng(37.5665, 126.9780); // Default: Seoul
 
+    // Shared state: track the active marker position across both location button and resize listener
+    let activeMarkerPos = null;
+
     // Fetch IP-based location and initialize map
     fetch('https://ipapi.co/json/')
       .then(res => res.json())
@@ -76,7 +79,7 @@ script.onload = () => {
 
       btn.onclick = (e) => {
         // Prevent map click events
-        e.stopPropagation(); 
+        e.stopPropagation();
 
         const handleGeolocation = (position) => {
           const lat = position.coords.latitude;
@@ -89,6 +92,7 @@ script.onload = () => {
             currentLocationMarker.setMap(null);
           }
           currentLocationMarker = new kakao.maps.Marker({ position: locPos, map: map });
+          activeMarkerPos = locPos; // 리사이즈 시 재중앙 정렬 기준점 저장
         };
 
         const handleIPFallback = () => {
@@ -104,7 +108,8 @@ script.onload = () => {
                   currentLocationMarker.setMap(null);
                 }
                 currentLocationMarker = new kakao.maps.Marker({ position: locPos, map: map });
-                
+                activeMarkerPos = locPos; // 리사이즈 시 재중앙 정렬 기준점 저장
+
                 alert('현재 접속 환경이 보안 연결(HTTPS)이 아니어서 IP 기반 대략적인 위치로 이동합니다.');
               }
             });
@@ -125,7 +130,7 @@ script.onload = () => {
     }
 
     function setupMapListeners(map) {
-      let activeMarkerPos = null; 
+      // activeMarkerPos는 외부 스코프 공유 변수 사용 (addLocationButton과 공유)
       let lastValidCenter = map.getCenter();
 
       // Track center changes to always have a fallback for re-centering
@@ -139,9 +144,9 @@ script.onload = () => {
 
         if (type === 'MOVE_TO') {
           const pos = new kakao.maps.LatLng(lat, lng);
-          activeMarkerPos = pos; 
+          activeMarkerPos = pos;
           map.setCenter(pos);
-          map.setLevel(3); 
+          map.setLevel(3);
 
           const marker = new kakao.maps.Marker({ position: pos, map });
           const infoWindow = new kakao.maps.InfoWindow({
@@ -149,15 +154,15 @@ script.onload = () => {
           });
           infoWindow.open(map, marker);
         } else if (type === 'relayout') {
-          // Just adjust container size during move. DO NOT call setCenter here to prevent drifting.
-          map.relayout();
-        } else if (type === 'recenter') {
-          // Final centering ONLY when resizing is finished (mouseup)
+          // 리사이즈 중에도 마커 위치(또는 마지막 중심)로 계속 재정렬
           map.relayout();
           const targetPos = activeMarkerPos || lastValidCenter;
-          if (targetPos) {
-              map.setCenter(targetPos);
-          }
+          if (targetPos) map.setCenter(targetPos);
+        } else if (type === 'recenter') {
+          // 리사이즈 완료 후 최종 정렬 (mouseup)
+          map.relayout();
+          const targetPos = activeMarkerPos || lastValidCenter;
+          if (targetPos) map.setCenter(targetPos);
         }
       });
     }

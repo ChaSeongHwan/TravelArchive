@@ -62,10 +62,16 @@ body[data-theme="weather"].rain-mode .sidebar-title {
    ========================================================== */
 body[data-theme="dark"] { background: #111827; color: #f3f4f6; }
 body[data-theme="dark"] .bg-gradient { background: radial-gradient(circle at 50% 50%, rgba(31,41,55,0.8) 0%, rgba(17,24,39,1) 100%); }
-body[data-theme="dark"] .hero h1, 
+body[data-theme="dark"] .hero h1,
 body[data-theme="dark"] .sidebar-title { color: rgba(255,255,255,0.9); }
 body[data-theme="dark"] .page-section h2 { color: rgba(255,255,255,0.95); }
 body[data-theme="dark"] .page-section p { color: rgba(255,255,255,0.75); }
+
+/* 어두운 테마에서 로고를 흰색으로 자동 전환 */
+body[data-theme="weather"].night-mode .sidebar-logo,
+body[data-theme="weather"].rain-mode .sidebar-logo {
+  background-image: url('/assets/Logo_W.svg');
+}
 
 body[data-theme="green"] { background: #a8d5ba; }
 body[data-theme="green"] .bg-gradient { background: linear-gradient(180deg, #dcf0e3 0%, #a8d5ba 100%); }

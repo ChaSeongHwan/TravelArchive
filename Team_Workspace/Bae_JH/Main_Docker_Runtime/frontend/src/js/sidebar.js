@@ -202,12 +202,7 @@ export const SidebarManager = {
         btn.classList.toggle('collapsed', collapse);
         btn.title = collapse ? '펴기' : '접기';
         
-        if (collapse) {
-          content.style.display = 'none';
-          content.style.pointerEvents = 'none';
-        } else {
-          content.style.display = 'block';
-          content.style.pointerEvents = 'auto';
+        if (!collapse) {
           // Fix: Recalculate heights when unfolding to prevent 1px height bug
           if (content.id === 'memoContent' || content.contains(document.getElementById('memoTableBody'))) {
             setTimeout(() => this.adjustAllMemoHeights(), 10);
@@ -239,6 +234,65 @@ export const SidebarManager = {
 
     this.initMemoRows(elements);
     this.initScheduleRows(elements);
+    this.initResizableWidgets();
+  },
+
+  initResizableWidgets() {
+    const MIN_HEIGHT = 200;
+    const targets = [
+      document.querySelector('.memo-inner-scroll'),
+      document.querySelector('.schedule-inner-scroll'),
+    ];
+
+    targets.forEach(el => {
+      if (!el || el.closest('.widget-resizable')) return; // 중복 초기화 방지
+
+      // wrapper로 감싸기
+      const wrapper = document.createElement('div');
+      wrapper.className = 'widget-resizable';
+      el.parentNode.insertBefore(wrapper, el);
+      wrapper.appendChild(el);
+
+      // 핸들 생성
+      const handle = document.createElement('div');
+      handle.className = 'widget-resize-handle';
+      handle.title = '드래그하여 크기 조절';
+      wrapper.appendChild(handle);
+
+      let isDragging = false;
+      let startY = 0;
+      let startHeight = 0;
+
+      handle.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        startY = e.clientY;
+        startHeight = el.getBoundingClientRect().height;
+        handle.classList.add('dragging');
+        document.body.style.userSelect = 'none';
+        document.body.style.cursor = 'ns-resize';
+        e.preventDefault();
+        e.stopPropagation();
+      });
+
+      document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const delta = e.clientY - startY;
+        const sidebarView = el.closest('.sidebar-view');
+        const maxHeight = sidebarView
+          ? Math.max(MIN_HEIGHT, sidebarView.clientHeight - 80)
+          : 500;
+        const newHeight = Math.max(MIN_HEIGHT, Math.min(startHeight + delta, maxHeight));
+        el.style.maxHeight = newHeight + 'px';
+      });
+
+      document.addEventListener('mouseup', () => {
+        if (!isDragging) return;
+        isDragging = false;
+        handle.classList.remove('dragging');
+        document.body.style.userSelect = '';
+        document.body.style.cursor = '';
+      });
+    });
   },
 
   bindRowActionButtons(elements) {
@@ -279,7 +333,7 @@ export const SidebarManager = {
         addScheduleRowBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             if (addScheduleRowBtn.classList.contains('disabled') || scheduleContent.classList.contains('section-content-collapsed')) return;
-            scheduleTableBody.appendChild(this.createScheduleRow('0900', '', scheduleTableBody, getSessionAndDate));
+            scheduleTableBody.appendChild(this.createScheduleRow('', '', scheduleTableBody, getSessionAndDate));
         });
     }
 
@@ -299,7 +353,7 @@ export const SidebarManager = {
   createMemoRow(index, content, tableBody, getInfo) {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td style="width: 32px; padding-top: 10px; text-align: center; color: rgba(31, 41, 55, 0.4); font-size: 11px; font-weight: 700; border-right: 1px solid rgba(255,255,255,0.05);">${index}</td>
+      <td style="width: 32px; padding-top: 8px; text-align: center; color: rgba(31, 41, 55, 0.4); font-size: 13px; font-weight: 400; font-family: inherit; line-height: 1.4; border-right: 1px solid rgba(255,255,255,0.05);">${index}</td>
       <td>
         <textarea class="memo-input-flat" placeholder="메모를 입력하세요..." rows="1">${content}</textarea>
       </td>
@@ -335,9 +389,9 @@ export const SidebarManager = {
 
     const getInfo = () => ({ sessionId, dateKey });
 
-    tableBody.innerHTML = '';
     try {
         const data = await BackendHooks.fetchMemo(sessionId, dateKey);
+        tableBody.innerHTML = '';
         const savedContent = data.memo || '';
         if (savedContent) {
             const lines = savedContent.split('\n');
@@ -347,6 +401,7 @@ export const SidebarManager = {
         }
     } catch (e) {
         console.error("Failed to load memo:", e);
+        tableBody.innerHTML = '';
         for (let i = 1; i <= 3; i++) tableBody.appendChild(this.createMemoRow(i, '', tableBody, getInfo));
     }
   },
@@ -354,7 +409,7 @@ export const SidebarManager = {
   createScheduleRow(time, activity, tableBody, getInfo) {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td><input type="text" class="schedule-time-input" value="${time}" placeholder="0000" maxlength="4" style="width:100%; background:transparent; border:none; color:inherit; font:inherit; outline:none;"></td>
+      <td><input type="text" class="schedule-time-input" value="${time}" placeholder="0900" maxlength="4" style="width:100%; background:transparent; border:none; color:inherit; font:inherit; outline:none;"></td>
       <td><input type="text" value="${activity}" placeholder="활동 입력" style="width:100%; background:transparent; border:none; color:inherit; font:inherit; outline:none;"></td>
     `;
     
@@ -394,17 +449,18 @@ export const SidebarManager = {
     const sessionId = hashPart.split('?')[0];
     const getInfo = () => ({ sessionId, dateKey });
 
-    tableBody.innerHTML = '';
     try {
         const data = await BackendHooks.fetchSchedule(sessionId, dateKey);
+        tableBody.innerHTML = '';
         const savedPlan = data.plan || [];
         if (savedPlan.length > 0) {
             savedPlan.forEach(p => tableBody.appendChild(this.createScheduleRow(p.time, p.activity, tableBody, getInfo)));
         } else {
-            tableBody.appendChild(this.createScheduleRow('0900', '', tableBody, getInfo));
+            tableBody.appendChild(this.createScheduleRow('', '', tableBody, getInfo));
         }
     } catch (e) {
         console.error("Failed to load schedule:", e);
+        tableBody.innerHTML = '';
     }
   },
 

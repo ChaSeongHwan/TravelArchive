@@ -19,3 +19,4 @@ aiohttp
 redis[hiredis]
 PyJWT
 passlib[bcrypt]
+alembic

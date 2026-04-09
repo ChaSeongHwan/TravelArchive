@@ -37,16 +37,39 @@
 }
 
 .sidebar-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   font-size: 11px;
   letter-spacing: 0.34em;
   color: rgba(31, 41, 55, 0.55);
   transition: color 0.2s;
-  padding: 0;
+  padding: 0 0 0 14px; /* Reduced from 20px to 14px as requested */
+}
+
+.sidebar-logo {
+  width: 22px;
+  height: 22px;
+  background-image: url('/assets/Logo_B.svg'); /* Default Black Logo */
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.8;
+  transition: opacity 0.2s, background-image 0.2s;
+}
+
+/* 다크 테마에서 흰색 로고로 전환 */
+[data-theme='dark'] .sidebar-logo {
+  background-image: url('/assets/Logo_W.svg');
 }
 
 .sidebar-label:hover {
   color: rgba(17, 24, 39, 0.9);
   font-weight: bold;
+}
+
+.sidebar-label:hover .sidebar-logo {
+  opacity: 1;
 }
 
 .sidebar-title {
@@ -103,9 +126,10 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
-  overflow: hidden; /* View itself is a shell, children handle scrolling */
-  padding: 0 !important;
-  margin: 0 6px 0 0 !important; /* Unified 6px right margin to match header/footer */
+  overflow-y: auto; /* 전체 사이드바 스크롤 */
+  overflow-x: hidden;
+  padding: 0 0 12px 0 !important; /* 하단 여백으로 footer에 가려지지 않도록 */
+  margin: 0 6px 0 0 !important;
   width: calc(100% - 6px) !important;
   box-sizing: border-box;
 }
@@ -145,7 +169,6 @@
 }
 
 .sidebar-list {
-  flex: 1;
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -153,7 +176,6 @@
   margin-right: 0;
   margin-top: -4px;
   width: 100%;
-  overflow-y: auto;
   padding-right: 0;
   box-sizing: border-box;
 }
@@ -162,15 +184,11 @@
 .calendar-container {
   display: flex;
   flex-direction: column;
-  flex: 1; /* Fix Item 1: Allow container to grow and fill space */
-  min-height: 0;
+  flex-shrink: 0; /* 부모 sidebar-view에서 shrink되지 않도록 → 전체 스크롤 활성화 */
   gap: 8px;
   margin-right: 0;
-  margin-top: 8px; 
+  margin-top: 8px;
   width: 100%;
-  overflow-y: auto; /* 통합 스크롤 적용 */
-  overflow-x: hidden; /* 가로 스크롤 방지 */
-  padding-right: 4px; /* 스크롤바 공간 확보 */
   box-sizing: border-box;
 }
 
@@ -221,14 +239,31 @@
   transform: rotate(-90deg);
 }
 
-/* 메모 섹션 관련 스타일 */
-.memo-list-container {
-  overflow: visible;
-  margin-bottom: 12px;
-  padding-right: 0;
-  flex: 0 0 auto; 
-  min-height: 0;
-  box-sizing: border-box;
+/* 섹션 폴딩 애니메이션 강화 (Framer Motion 스타일) */
+.calendar-placeholder,
+.memo-list-container,
+.schedule-list-container {
+  overflow: hidden;
+  transition:
+    max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.3s ease,
+    margin 0.35s ease,
+    padding 0.35s ease,
+    transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); /* 살짝 튕기는 느낌 */
+  max-height: 20000px; /* 더 늘어난 콘텐츠 대응을 위해 20000px로 상향 */
+  opacity: 1;
+  transform: translateY(0);
+}
+/* 닫혔을 때의 상태 */
+.section-content-collapsed {
+  max-height: 0 !important;
+  opacity: 0 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  transform: translateY(-10px) !important;
+  pointer-events: none;
 }
 
 .memo-table {
@@ -282,13 +317,52 @@
 }
 
 .schedule-list-container {
-  overflow: visible;
+  overflow: hidden; /* 애니메이션 wrapper */
   margin-bottom: 12px;
   padding-right: 0;
   flex: 0 0 auto;
-  min-height: 0;
   box-sizing: border-box;
 }
+
+/* 이중 스크롤 - 각 위젯 내부 스크롤 영역 */
+.memo-inner-scroll,
+.schedule-inner-scroll {
+  max-height: 200px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* 위젯 리사이즈 wrapper */
+.widget-resizable {
+  position: relative;
+}
+
+/* 오른쪽 아래 리사이즈 핸들 (삼각형 선 패턴) */
+.widget-resize-handle {
+  position: absolute;
+  bottom: 3px;
+  right: 3px;
+  width: 14px;
+  height: 14px;
+  cursor: ns-resize;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  background-size: 14px 14px;
+  background-repeat: no-repeat;
+  background-position: bottom right;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14'%3E%3Cline x1='2' y1='14' x2='14' y2='2' stroke='%23111827' stroke-opacity='0.4' stroke-width='1.5' stroke-linecap='round'/%3E%3Cline x1='7' y1='14' x2='14' y2='7' stroke='%23111827' stroke-opacity='0.4' stroke-width='1.5' stroke-linecap='round'/%3E%3Cline x1='12' y1='14' x2='14' y2='12' stroke='%23111827' stroke-opacity='0.4' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+.widget-resizable:hover .widget-resize-handle,
+.widget-resize-handle.dragging {
+  opacity: 1;
+}
+
+[data-theme="dark"] .widget-resize-handle {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14'%3E%3Cline x1='2' y1='14' x2='14' y2='2' stroke='%23ffffff' stroke-opacity='0.4' stroke-width='1.5' stroke-linecap='round'/%3E%3Cline x1='7' y1='14' x2='14' y2='7' stroke='%23ffffff' stroke-opacity='0.4' stroke-width='1.5' stroke-linecap='round'/%3E%3Cline x1='12' y1='14' x2='14' y2='12' stroke='%23ffffff' stroke-opacity='0.4' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
 
 .calendar-placeholder {
   background: rgba(255, 255, 255, 0.40);
@@ -367,7 +441,7 @@
 .schedule-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 12px;
+  font-size: 13px;
   background: rgba(255, 255, 255, 0.40);
   border-radius: 12px;
   overflow: hidden;
@@ -378,17 +452,19 @@
   padding: 8px 10px;
   text-align: left;
   box-sizing: border-box;
+  color: rgba(17, 24, 39, 0.85);
+  font-family: inherit;
+  line-height: 1.4;
 }
 
 .schedule-table th {
   background: rgba(255, 255, 255, 0.40);
   font-weight: 700;
-  color: rgba(31, 41, 55, 0.8);
 }
 
 .schedule-table td {
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(17, 24, 39, 0.85);
+  font-weight: 400;
 }
 
 .schedule-table tr:last-child td {
