@@ -345,6 +345,36 @@ export const BackendHooks = {
   },
 
   /**
+   * adds a single map marker (backend-side call or parent proxy).
+   */
+  async addMapMarker(sessionId, markerId, lat, lng, title = '') {
+    try {
+      const res = await fetch(`/api/sessions/${sessionId}/map/markers/add`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ marker_id: markerId, lat, lng, title })
+      });
+      return await res.json();
+    } catch (error) {
+      console.error("API Error (addMapMarker):", error);
+    }
+  },
+
+  /**
+   * removes a single map marker by id.
+   */
+  async removeMapMarker(sessionId, markerId) {
+    try {
+      const res = await fetch(`/api/sessions/${sessionId}/map/markers/${encodeURIComponent(markerId)}`, {
+        method: 'DELETE'
+      });
+      return await res.json();
+    } catch (error) {
+      console.error("API Error (removeMapMarker):", error);
+    }
+  },
+
+  /**
    * saves the trip ranges for a specific session.
    */
   async saveTripRange(sessionId, ranges) {

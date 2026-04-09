@@ -42,10 +42,16 @@
 
 ## 4. 지도 데이터 관리 (`/api/sessions/.../map`)
 
+> 지도 마커는 두 방향으로 흐릅니다.  
+> **프론트→백**: 사용자 클릭 시 `map.js`가 직접 API 호출 (`window.parent.currentSessionId` 사용).  
+> **백→프론트**: 부모 창이 `fetchMapMarkers`로 폴링 후 iframe에 `postMessage { type: 'ADD_MARKER' }`.
+
 | 함수명 | HTTP 메소드 | 엔드포인트 | 매개변수 | 설명 |
 | :--- | :---: | :--- | :--- | :--- |
-| `fetchMapMarkers` | GET | `/api/sessions/${id}/map/markers` | - | 세션에 저장된 지도 마커(핀) 목록 조회 |
-| `saveMapMarkers` | POST | `/api/sessions/${id}/map/markers` | `markers` (Array) | 세션의 지도 마커(핀) 데이터 일괄 저장 |
+| `addMapMarker` | POST | `/api/sessions/${id}/map/markers/add` | `markerId`, `lat`, `lng`, `title?` | 마커 단건 추가. `map.js` 또는 부모 창에서 직접 호출 가능 |
+| `removeMapMarker` | DELETE | `/api/sessions/${id}/map/markers/${markerId}` | `markerId` | 마커 단건 삭제. 우클릭 제거 시 `map.js`가 자동 호출 |
+| `fetchMapMarkers` | GET | `/api/sessions/${id}/map/markers` | - | 세션 전체 마커 조회. 백엔드→지도 push 기준 소스 |
+| `saveMapMarkers` | POST | `/api/sessions/${id}/map/markers` | `markers` (Array) | 마커 목록 일괄(bulk) upsert |
 
 ## 5. 앱 설정 및 사용자 환경 (`/api/...`)
 
@@ -60,4 +66,4 @@
 | `fetchCurrentWeather` | GET | `/api/weather` | - | 현재 날씨 상태 및 물리 효과 파라미터 조회 |
 
 ---
-*Last Updated: 2026-04-08*
+*Last Updated: 2026-04-10*

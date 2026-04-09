@@ -81,6 +81,12 @@ class InviteRequest(BaseModel):
 class MapMarkersRequest(BaseModel):
     markers: List[Dict]
 
+class MapMarkerAddRequest(BaseModel):
+    marker_id: str
+    lat: float
+    lng: float
+    title: Optional[str] = None
+
 class MemoRequest(BaseModel):
     memo: str
 
@@ -96,6 +102,7 @@ class TripRangeRequest(BaseModel):
 mock_trip_ranges: Dict[str, List[Dict]] = {} # {session_id: [{"start": "...", "end": "..."}]}
 mock_memos: Dict[str, Dict[str, str]] = {} # {session_id: {date_key: content}}
 mock_plans: Dict[str, Dict[str, List]] = {} # {session_id: {date_key: [plan_items]}}
+mock_map_markers: Dict[str, Dict[str, Dict]] = {} # {session_id: {marker_id: {marker_id, lat, lng, title}}}
 
 # ==========================================
 # API 라우터
@@ -186,13 +193,51 @@ async def share_chat(session_id: str):
     return {"success": True, "share_url": f"http://localhost/share/{session_id}"}
 
 # --- 지도 및 캘린더/플래너 ---
+@app.post("/api/sessions/{session_id}/map/markers/add")
+async def add_map_marker(session_id: str, req: MapMarkerAddRequest):
+    """프론트엔드 클릭 또는 백엔드 로직으로 마커 단건 추가"""
+    if session_id not in mock_map_markers:
+        mock_map_markers[session_id] = {}
+    mock_map_markers[session_id][req.marker_id] = {
+        "marker_id": req.marker_id,
+        "lat": req.lat,
+        "lng": req.lng,
+        "title": req.title or ""
+    }
+    print(f"[Backend] 마커 추가: session={session_id}, id={req.marker_id}, ({req.lat}, {req.lng})")
+    return {"success": True, "marker_id": req.marker_id}
+
+@app.delete("/api/sessions/{session_id}/map/markers/{marker_id}")
+async def delete_map_marker(session_id: str, marker_id: str):
+    """마커 단건 삭제 (우클릭 제거 또는 백엔드 요청)"""
+    removed = False
+    if session_id in mock_map_markers and marker_id in mock_map_markers[session_id]:
+        del mock_map_markers[session_id][marker_id]
+        removed = True
+    print(f"[Backend] 마커 삭제: session={session_id}, id={marker_id}, removed={removed}")
+    return {"success": True, "removed": removed}
+
 @app.post("/api/sessions/{session_id}/map/markers")
 async def save_map_markers(session_id: str, req: MapMarkersRequest):
+    """마커 목록 일괄 저장 (bulk upsert)"""
+    if session_id not in mock_map_markers:
+        mock_map_markers[session_id] = {}
+    for m in req.markers:
+        mid = m.get("marker_id") or m.get("id")
+        if mid:
+            mock_map_markers[session_id][mid] = {
+                "marker_id": mid,
+                "lat": m.get("lat", 0),
+                "lng": m.get("lng", 0),
+                "title": m.get("title", "")
+            }
     return {"success": True}
 
 @app.get("/api/sessions/{session_id}/map/markers")
 async def get_map_markers(session_id: str):
-    return {"markers": []}
+    """현재 세션의 모든 마커 조회 (백엔드→지도 push 기준)"""
+    markers = list(mock_map_markers.get(session_id, {}).values())
+    return {"markers": markers}
 
 @app.put("/api/sessions/{session_id}/trip_range")
 async def save_trip_range(session_id: str, req: TripRangeRequest):

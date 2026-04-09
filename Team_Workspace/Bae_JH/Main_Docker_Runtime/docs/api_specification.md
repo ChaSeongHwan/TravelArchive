@@ -55,10 +55,27 @@
 
 ## 5. 지도 마커 (Map Markers)
 
+> **채널 구조**: 사용자 클릭 → `map.js` → `백엔드 API` 저장 + `postMessage`로 부모 창 알림.  
+> 백엔드가 마커를 찍을 때는 → 부모 창이 `GET /map/markers` 폴링 후 → iframe에 `postMessage { type: 'ADD_MARKER' }`.
+
 | 기능 명칭 (JS 함수) | 엔드포인트 (Method / URL) | 입력 데이터 (Path/Query/Body) | 출력 데이터 (Response) | 설명 |
 | :--- | :--- | :--- | :--- | :--- |
-| `saveMapMarkers` | `POST /api/sessions/{id}/map/markers`| Path: `id`, Body: `{markers: []}`| `{success}` | 해당 세션의 지도 마커 데이터 저장 |
-| `fetchMapMarkers`| `GET /api/sessions/{id}/map/markers`| Path: `id` | `{markers: []}` | 해당 세션의 저장된 지도 마커 조회 |
+| `addMapMarker` | `POST /api/sessions/{id}/map/markers/add` | Path: `id`, Body: `{marker_id, lat, lng, title?}` | `{success, marker_id}` | 마커 단건 추가. 프론트 클릭 또는 백엔드 AI 요청 공용 |
+| `removeMapMarker` | `DELETE /api/sessions/{id}/map/markers/{marker_id}` | Path: `id`, `marker_id` | `{success, removed}` | 마커 단건 삭제. 우클릭 제거 또는 백엔드 요청 공용 |
+| `fetchMapMarkers` | `GET /api/sessions/{id}/map/markers` | Path: `id` | `{markers: [{marker_id, lat, lng, title}]}` | 세션 전체 마커 조회. 백엔드→지도 push 기준 소스 |
+| `saveMapMarkers` | `POST /api/sessions/{id}/map/markers` | Path: `id`, Body: `{markers: []}` | `{success}` | 마커 일괄(bulk) upsert |
+
+### postMessage 채널 (map iframe ↔ 부모 창)
+
+| 방향 | type | 페이로드 | 설명 |
+| :--- | :--- | :--- | :--- |
+| iframe → 부모 | `MARKER_ADDED` | `{markerId, lat, lng}` | 사용자 좌클릭으로 마커 추가됨 |
+| iframe → 부모 | `MARKER_REMOVED` | `{markerId}` | 사용자 우클릭으로 마커 제거됨 |
+| 부모 → iframe | `ADD_MARKER` | `{markerId, lat, lng, title?}` | 백엔드 지시로 지도에 마커 표시 |
+| 부모 → iframe | `REMOVE_MARKER` | `{markerId}` | 백엔드 지시로 지도에서 마커 제거 |
+| 부모 → iframe | `MOVE_TO` | `{lat, lng, title}` | 지도 중심 이동 + 파란 마커·말풍선 표시 |
+| 부모 → iframe | `relayout` | — | 사이드바 리사이즈 중 지도 레이아웃 갱신 |
+| 부모 → iframe | `recenter` | — | 리사이즈 완료 후 마커 위치로 최종 정렬 |
 
 ---
 
