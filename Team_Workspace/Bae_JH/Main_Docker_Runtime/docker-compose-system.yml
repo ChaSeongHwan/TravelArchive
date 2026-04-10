@@ -4,8 +4,9 @@ services:
       context: .
       dockerfile: backend/Dockerfile
     container_name: TA_backend
+    env_file:
+      - ./setting/.env
     environment:
-      # db 컴포즈 파일에서 지정한 컨테이너 이름(travelarchive_db)을 호스트 주소로 사용합니다.
       - DATABASE_URL
     volumes:
       - .:/app
