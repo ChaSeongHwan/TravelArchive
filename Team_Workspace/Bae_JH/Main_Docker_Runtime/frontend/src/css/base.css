@@ -9,7 +9,7 @@
   --sidebar-glass-opacity: calc(var(--app-glass-opacity) + 0.20); /* 본문보다 더 불투명하게 */
   --sidebar-bg: rgba(255, 255, 255, var(--sidebar-glass-opacity));
   --glass-border: rgba(255, 255, 255, 0.34);
-  
+
   /* Layout */
   --sidebar-default-width: 300px;
   --sidebar-min-width: 260px;
@@ -18,21 +18,25 @@
   --app-padding: 18px;
   --card-radius: 24px;
   --panel-radius: 32px;
-  
+
   /* Animation */
   --transition-speed: 0.3s;
   --transition-ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Typography — JS로 설정 탭에서 제어 */
+  --app-font-family: "Pretendard", "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
+  --app-font-size: 15px;
 }
 
 * { 
   box-sizing: border-box; 
 }
 
-html, body { 
-  margin: 0; 
-  width: 100%; 
-  height: 100%; 
-  font-family: "Pretendard", "Noto Sans KR", "Apple SD Gothic Neo", sans-serif; 
+html, body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  font-family: var(--app-font-family);
 }
 
 body { 

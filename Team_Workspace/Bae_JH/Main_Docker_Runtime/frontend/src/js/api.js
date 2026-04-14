@@ -35,12 +35,37 @@ export const TokenManager = {
   getNickname() { return localStorage.getItem(this._keys.nickname) || '사용자'; },
   getEmail() { return localStorage.getItem(this._keys.email) || ''; },
 
-  isLoggedIn() { return !!localStorage.getItem(this._keys.access); },
+  /**
+   * 로그인 여부 확인.
+   * - 토큰 존재 + JWT exp 미만료인 경우만 true
+   * - 만료된 경우 localStorage 자동 초기화
+   */
+  isLoggedIn() {
+    const token = localStorage.getItem(this._keys.access);
+    if (!token) return false;
+
+    // JWT payload 디코딩 (서명 검증 없이 만료 시각만 확인)
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (payload.exp && Date.now() / 1000 > payload.exp) {
+        // 만료된 토큰 — 로컬 데이터 전체 삭제
+        this.clearAll();
+        return false;
+      }
+    } catch {
+      // 디코딩 실패 (토큰 형식 이상) — 로그아웃 처리
+      this.clearAll();
+      return false;
+    }
+    return true;
+  },
   isGuest() {
+    if (!this.isLoggedIn()) return false;
     const t = localStorage.getItem(this._keys.userType);
     return t === 'GST';
   },
   isMember() {
+    if (!this.isLoggedIn()) return false;
     const t = localStorage.getItem(this._keys.userType);
     return t === 'MEM';
   },
@@ -629,6 +654,114 @@ export const BackendHooks = {
       return await res.json();
     } catch {
       return [];
+    }
+  },
+
+  // --------------------------------------------------
+  // 사용자 프로필 API
+  // --------------------------------------------------
+
+  /**
+   * 사용자 프로필 저장 (닉네임, 소개, 이메일, 추가 연락수단).
+   */
+  async saveUserProfile(data) {
+    try {
+      const res = await this._authFetch('/api/user/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw { status: res.status, detail: (await res.json()).detail };
+      return await res.json();
+    } catch (error) {
+      console.error('API Error (saveUserProfile):', error);
+      throw error;
+    }
+  },
+
+  /**
+   * AI 스타일/말투 설정 저장 (특성, 이모지, 헤더, 지침, 추가 정보).
+   */
+  async saveUserStyle(data) {
+    try {
+      const res = await this._authFetch('/api/user/style', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw { status: res.status, detail: (await res.json()).detail };
+      return await res.json();
+    } catch (error) {
+      console.error('API Error (saveUserStyle):', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 여행 스타일 설정 저장.
+   */
+  async saveTravelPreferences(data) {
+    try {
+      const res = await this._authFetch('/api/user/travel', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw { status: res.status, detail: (await res.json()).detail };
+      return await res.json();
+    } catch (error) {
+      console.error('API Error (saveTravelPreferences):', error);
+      throw error;
+    }
+  },
+
+  /**
+   * SNS 계정 연동.
+   */
+  async linkSocialAccount(provider) {
+    try {
+      const res = await this._authFetch(`/api/auth/social/link/${provider}`, {
+        method: 'POST',
+      });
+      return await res.json();
+    } catch (error) {
+      console.error(`API Error (linkSocialAccount:${provider}):`, error);
+      throw error;
+    }
+  },
+
+  /**
+   * 모든 기기에서 로그아웃 (refresh token 전체 무효화).
+   */
+  async logoutAllDevices() {
+    try {
+      const res = await this._authFetch('/api/auth/logout/all', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh_token: TokenManager.getRefreshToken() }),
+      });
+      TokenManager.clearAll();
+      return await res.json();
+    } catch (error) {
+      console.error('API Error (logoutAllDevices):', error);
+      TokenManager.clearAll();
+      throw error;
+    }
+  },
+
+  /**
+   * 계정 영구 삭제.
+   */
+  async deleteAccount() {
+    try {
+      const res = await this._authFetch('/api/user/account', {
+        method: 'DELETE',
+      });
+      if (!res.ok) throw { status: res.status, detail: (await res.json()).detail };
+      return await res.json();
+    } catch (error) {
+      console.error('API Error (deleteAccount):', error);
+      throw error;
     }
   },
 };

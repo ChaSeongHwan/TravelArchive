@@ -1,20 +1,26 @@
-<div class="card-base">
-  <label class="label-base" for="transparencySlider">배경 투명도 조절</label>
-  <div class="slider-wrapper">
-    <div class="slider-container">
-      <span class="slider-hint">0%</span>
-      <div class="range-with-ticks">
-        <input type="range" id="transparencySlider" min="0" max="50" step="10" value="20">
-        <div class="slider-ticks">
-          <span></span><span></span><span></span><span></span><span></span><span></span>
-        </div>
-      </div>
-      <span class="slider-hint">50%</span>
-    </div>
-  </div>
-  <p class="settings-description">패널의 불투명도를 0%에서 50% 사이로 조절합니다. (10% 단위 고정)</p>
-</div>
-<div class="card-base">
-  <label class="label-base">시스템 설정</label>
-  <p class="help-answer">여기에 나중에 다양한 설정 옵션이 추가될 예정입니다.</p>
-</div>
+<!-- settings.html
+     이 파일은 settings.js 에 의해 동적으로 렌더링됩니다.
+     직접 사용하지 않으며, renderSettingsPage() 가 container.innerHTML 을 완전히 대체합니다.
+
+     렌더링 구조 (로그인 상태에 따라 분기):
+     ┌─────────────────────────────────────────┐
+     │  시스템 설정                              │
+     │  ├── 배경 투명도 (슬라이더)               │
+     │  └── 알림 (응답완료·날씨변동·추천일정 토글) │
+     │                                         │
+     │  [로그인 후 추가 표시]                    │
+     │  개인 설정                               │
+     │  ├── 기본 프로필 (소개·닉네임·이메일+연락수단) │
+     │  ├── 기본 스타일 및 말투                  │
+     │  │   (특성칩·이모지·헤더·지침·추가정보)    │
+     │  └── 여행 스타일                         │
+     │      (스타일칩·일정·숙박·음식·알러지·거리·  │
+     │       날씨혼잡도·반려견·장애접근성)         │
+     │                                         │
+     │  [정회원 전용]                            │
+     │  계정 관리                               │
+     │  ├── SNS 연동 (Google·Kakao·Naver)      │
+     │  ├── 모든 기기 로그아웃                   │
+     │  └── 계정 삭제                           │
+     └─────────────────────────────────────────┘
+-->
