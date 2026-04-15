@@ -2,10 +2,10 @@
  * script.js (Root)
  */
 
-import { BackendHooks } from './js/api.js';
+import { BackendHooks, TokenManager } from './js/api.js';
 import { adjustTextareaHeight, showToast } from './js/ui.js';
 import { SidebarManager } from './js/sidebar.js';
-import { ChatManager } from './js/chat.js';
+import { ChatManager } from './js/chat.js';  // _onNewSession 자동 전송에도 사용
 import { SessionManager } from './js/session.js';
 import { CalendarManager } from './js/calendar.js';
 import { ScheduleManager } from './js/schedule.js';
@@ -69,14 +69,144 @@ document.addEventListener('DOMContentLoaded', async () => {
     themePopup: document.getElementById('themePopup'),
     themeSwatches: document.querySelectorAll('.theme-swatch'),
     weatherLayer: document.getElementById('weatherLayer'),
-    bgPanorama: document.getElementById('bgPanorama')
+    bgPanorama: document.getElementById('bgPanorama'),
+    homeDashboard: document.getElementById('homeDashboard'),
+    planFilter: document.getElementById('planFilter'),
+    planFilterTrigger: document.getElementById('planFilterTrigger'),
+    planFilterLabel: document.getElementById('planFilterLabel'),
+    planFilterMenu: document.getElementById('planFilterMenu'),
   };
 
-  const state = { 
-    currentSessionId: null, 
+  const state = {
+    currentSessionId: null,
     isReceiving: false,
-    currentMode: 'personal' // 'personal' or 'team'
+    currentMode: 'personal', // 'personal' or 'team'
+    currentPlanId: null,     // null = 전체, 'plan_xxx' = 특정 계획
   };
+
+  // 홈 대시보드 "+" 카드 클릭 → 목적지 입력 후 세션 생성 + 첫 메시지 자동 전송
+  elements._onNewSession = async (destination) => {
+    if (state.isReceiving) return;
+    try {
+      const title = destination ? `${destination} 여행` : '새 여행 계획';
+      const session = await BackendHooks.createSession(
+        title, state.currentMode, state.currentPlanId
+      );
+      SessionManager.renderSidebarItem(session.title, session.id, elements, state, true);
+      window.location.hash = `#/chat/${session.id}`;
+
+      // 목적지가 있으면 라우터·채팅 뷰 전환 완료 후 첫 메시지 자동 전송
+      if (destination) {
+        setTimeout(() => {
+          elements.chatInput.value = destination;
+          adjustTextareaHeight(elements.chatInput, elements.chatBox);
+          ChatManager.handleSend(state, elements);
+        }, 350);
+      }
+    } catch (e) {
+      console.error('[Home] 새 세션 생성 실패:', e);
+    }
+  };
+
+  // 사이드바 세션 목록 재조회
+  elements._refreshSessions = () => SessionManager.init(elements, state);
+
+  // ── 계획 드롭다운 ─────────────────────────────────────────
+  // plans 상태를 외부로 빼서 이벤트 핸들러가 항상 최신 목록을 참조
+  let _planList = [];
+  let _planDropdownInited = false;
+
+  function _renderPlanMenu() {
+    const { planFilterLabel, planFilterMenu } = elements;
+    if (!planFilterMenu) return;
+    planFilterMenu.innerHTML = '';
+
+    const allItem = document.createElement('div');
+    allItem.className = 'plan-filter-item' + (state.currentPlanId === null ? ' active' : '');
+    allItem.dataset.planId = '';
+    allItem.textContent = '전체';
+    planFilterMenu.appendChild(allItem);
+
+    for (const plan of _planList) {
+      const item = document.createElement('div');
+      item.className = 'plan-filter-item' + (state.currentPlanId === plan.id ? ' active' : '');
+      item.dataset.planId = plan.id;
+      item.textContent = plan.title || '이름 없는 계획';
+      planFilterMenu.appendChild(item);
+    }
+
+    // 로그아웃 상태면 레이블도 초기화
+    if (!TokenManager.isLoggedIn()) {
+      planFilterLabel.textContent = '전체';
+    }
+  }
+
+  async function initPlanDropdown() {
+    const { planFilterTrigger, planFilterLabel, planFilterMenu } = elements;
+    if (!planFilterTrigger) return;
+
+    try {
+      _planList = TokenManager.isLoggedIn() ? await BackendHooks.fetchPlanList() : [];
+    } catch (e) { _planList = []; }
+
+    _renderPlanMenu();
+
+    // 이벤트 리스너는 최초 1회만 등록 (중복 방지)
+    if (_planDropdownInited) return;
+    _planDropdownInited = true;
+
+    planFilterTrigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      planFilterMenu.classList.toggle('open');
+    });
+
+    planFilterMenu.addEventListener('click', (e) => {
+      const item = e.target.closest('.plan-filter-item');
+      if (!item) return;
+
+      const selectedId = item.dataset.planId || null;
+      state.currentPlanId = selectedId;
+      planFilterLabel.textContent = selectedId
+        ? (_planList.find(p => p.id === selectedId)?.title || '계획')
+        : '전체';
+
+      planFilterMenu.classList.remove('open');
+      _renderPlanMenu();
+      SessionManager.init(elements, state);
+    });
+
+    document.addEventListener('click', () => planFilterMenu.classList.remove('open'));
+  }
+
+  elements._refreshPlanDropdown = initPlanDropdown;
+
+  // ── 로그아웃 이벤트: account.js → script.js 브리지 ────────
+  document.addEventListener('ta:logout', () => {
+    // 상태 초기화
+    state.currentSessionId = null;
+    state.currentPlanId    = null;
+
+    // 사이드바 세션 목록 지우기
+    elements.sidebarList.innerHTML = '';
+
+    // 홈 대시보드 숨기기
+    if (elements.homeDashboard) {
+      elements.homeDashboard.style.display = 'none';
+      elements.homeDashboard.innerHTML = '';
+    }
+    elements.heroSection?.classList.remove('dashboard-active');
+
+    // plan 드롭다운 갱신 (로그아웃 상태 → 빈 목록)
+    _planList = [];
+    _renderPlanMenu();
+
+    // 홈으로 이동 (이미 홈이면 router 강제 호출)
+    if (!window.location.hash || window.location.hash === '#/') {
+      router(state, elements);
+    } else {
+      window.location.hash = '#/';
+    }
+  });
   
   // 2. Initialization & Backend Config
   let config = { currentLeftWidth: 300, currentRightWidth: 300 };
@@ -113,18 +243,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 3. Parallel Async Initialization (Don't block UI event listeners)
   (async () => {
     try {
+      await initPlanDropdown();
       await SessionManager.init(elements, state);
       await CalendarManager.init(todayDate);
       await CalendarManager.render(elements.calendarContent);
       await ScheduleManager.render(elements.scheduleContent);
-      
-      // Fix Item 3: Initialize folding & rows after calendar/schedule is fully ready
+
       SidebarManager.initTabs(elements);
       SidebarManager.initResizers(elements, config);
       SidebarManager.initFolding(elements);
       ThemeManager.init(elements);
-      
-      // Initial routing after full init
+
       router(state, elements);
     } catch (e) {
       console.warn("Some async components failed to load, UI will still function", e);

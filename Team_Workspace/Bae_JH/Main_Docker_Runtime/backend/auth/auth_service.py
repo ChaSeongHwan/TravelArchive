@@ -123,7 +123,10 @@ async def login(postgres: PostgresManager, redis: RedisManager, email: str, pw: 
     if result.get("status") != "success" or not result.get("data"):
         raise HTTPException(status_code=401, detail="존재하지 않는 계정입니다")
 
-    user_id = result["data"][0]["user_id"]
+    profile  = result["data"][0]
+    user_id  = profile["user_id"]
+    nickname = profile.get("nickname", "")
+    email    = profile.get("email", "")
 
     # 2. 보안 정보 조회
     sec_result = await postgres.execute({
@@ -193,11 +196,13 @@ async def login(postgres: PostgresManager, redis: RedisManager, email: str, pw: 
     })
 
     return {
-        "access_token": access_token,
+        "access_token":  access_token,
         "refresh_token": refresh_token,
-        "user_id": user_id,
-        "type": "MEM",
-        "status": "success",
+        "user_id":       user_id,
+        "type":          "MEM",
+        "nickname":      nickname,
+        "email":         email,
+        "status":        "success",
     }
 
 

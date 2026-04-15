@@ -174,11 +174,12 @@ export const SessionManager = {
 
   async init(elements, state) {
     elements.sidebarList.innerHTML = '';
-    const mode = state.currentMode || 'personal';
+    const mode    = state.currentMode    || 'personal';
+    const planId  = state.currentPlanId  || null;
 
     try {
-      const filteredSessions = await BackendHooks.fetchSessionList(mode);
-      for (const session of filteredSessions) {
+      const sessions = await BackendHooks.fetchSessionList(mode, planId);
+      for (const session of sessions) {
         this.renderSidebarItem(session.title, session.id, elements, state, false);
       }
     } catch (error) { console.error(error); }

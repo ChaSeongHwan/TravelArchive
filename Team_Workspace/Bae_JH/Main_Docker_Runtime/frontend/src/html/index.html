@@ -46,6 +46,18 @@
             </button>
           </div>
           
+          <!-- 계획 필터 드롭다운 -->
+          <div class="plan-filter" id="planFilter">
+            <button class="plan-filter-trigger" id="planFilterTrigger" type="button">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+              <span class="plan-filter-label" id="planFilterLabel">전체</span>
+              <svg class="plan-filter-chevron" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="plan-filter-menu" id="planFilterMenu">
+              <!-- JS로 동적 삽입 -->
+            </div>
+          </div>
+
           <div class="sidebar-tabs">
             <button id="tabSessions" class="sidebar-tab active" title="대화 목록">
               <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
@@ -187,6 +199,8 @@
           <div class="hero-label">WELCOME</div>
           <h1> Hello, World.</h1>
           <p>여행 플래너 메인 대문입니다.</p>
+          <!-- 로그인 후 계획 카드 — hero 내부 하단에 위치 -->
+          <div class="home-dashboard-wrapper" id="homeDashboard" style="display:none;"></div>
         </div>
 
         <div class="page-section" id="pageSection"></div>

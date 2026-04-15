@@ -62,8 +62,13 @@ created_at  발급 시각
 
 [카테고리: 세션 및 챗봇 커뮤니케이션]
 
+// 핵심 관계: 여러 Session이 하나의 Trip(여행 계획)을 공유할 수 있음
+// Session은 대화 스레드, Trip은 계획 데이터의 실체
+// session.trip_id → trips.trip_id (N:1)
+
 테이블: sessions
 session_id       세션 고유 식별자
+trip_id          trips 참조 (연결된 여행 계획, null이면 계획 미연결)
 title            세션 표시 이름
 context          AI가 요약한 누적 대화 맥락
 mode             개인 / 팀 구분
@@ -73,7 +78,7 @@ updated_at       갱신 시각
 
 테이블: session_participants
 session_id  sessions 참조
-user_ids     users 참조
+user_id     users 참조
 role        방장 / 참여자
 joined_at   참여 시각
 
@@ -89,7 +94,7 @@ created_at   메시지 발생 시각
 file_id      파일 고유 식별자
 session_id   sessions 참조
 uploader_id  업로드한 사용자
-message_id  함께 업로드한 메시지
+message_id   함께 업로드한 메시지
 file_url     저장된 파일 URL
 file_name    원본 파일명
 file_type    파일 포맷
@@ -138,6 +143,16 @@ is_main    대표 이미지 여부
 
 [카테고리: 여행 계획]
 
+// 핵심 관계:
+//   trips          ←(1:N)→ sessions          (한 계획에 여러 대화 스레드)
+//   trips          ←(1:N)→ trip_participants  (계획 참여자)
+//   trips          ←(1:N)→ trip_days          (일차별 날짜)
+//   trip_days      ←(1:N)→ itinerary_items    (일정 항목)
+//   itinerary_items → places                  (방문 장소)
+//   trips          ←(1:N)→ trip_memos         (날짜별 자유 메모)
+//   trips          ←(1:N)→ trip_map_markers   (지도 마커)
+//   trips          ←(1:N)→ trip_files         (계획 첨부파일)
+
 테이블: trips
 trip_id          여행 계획 고유 식별자
 title            여행 제목
@@ -164,26 +179,53 @@ target_date  실제 날짜
 테이블: itinerary_items
 item_id           세부 일정 항목 식별자
 trip_day_id       trip_days 참조
-place_id          방문 장소
+place_id          방문 장소 (places 참조, null이면 사용자 직접 입력)
+custom_place_name 장소 직접 입력 시 이름 (place_id가 null일 때)
 visit_order       당일 방문 순서
 start_time        방문 시작 예정 시간
 end_time          방문 종료 예정 시간
-memo              메모
+memo              개별 항목 메모
 transport_from    이전 장소에서의 이동 수단
 travel_time_min   이동 예상 소요 시간 (분)
+
+테이블: trip_memos
+memo_id     메모 고유 식별자
+trip_id     trips 참조
+date_key    해당 날짜 (YYYY-MM-DD)
+content     자유 형식 메모 텍스트
+updated_by  마지막 수정 사용자 (users 참조)
+updated_at  수정 시각
+
+테이블: trip_map_markers
+marker_id   마커 고유 식별자
+trip_id     trips 참조
+lat         위도
+lng         경도
+title       마커 표시 이름
+note        메모
+added_by    추가한 사용자 (users 참조)
+created_at  추가 시각
+
+테이블: trip_files
+file_id      파일 고유 식별자
+trip_id      trips 참조
+uploader_id  업로드한 사용자 (users 참조)
+file_url     저장된 파일 URL
+file_name    원본 파일명
+file_type    파일 포맷
+file_size    파일 크기 (bytes)
+uploaded_at  업로드 시각
 
 
 [카테고리: 날씨 정보]
 
-테이블 weather_list
-weather_list_id
-target_date    예보 대상 날짜
-travel_ids		해당 날짜 여행 있는가?
-weather_ids
+// 핵심 관계:
+//   weather_snapshots ←(N:1)→ 권역(region) 기준 조회
+//   trip_days.target_date + trips.destination → weather_snapshots JOIN으로 일정별 날씨 연결
 
 테이블: weather_snapshots
 weather_id     예보 고유 식별자
-region         권역명
+region         권역명 (places.region 값과 일치)
 target_date    예보 대상 날짜
 condition      날씨 상태 (맑음, 비, 흐림 등)
 temp_min       최저 기온
@@ -192,3 +234,22 @@ rain_prob      강수 확률
 precipitation  예상 강수량
 wind_speed     예상 풍속
 fetched_at     데이터 수집 시각
+
+
+[관계 요약]
+
+users         ──(1:N)── sessions             (사용자가 여러 대화 세션 보유)
+users         ──(1:N)── trip_participants     (사용자가 여러 계획에 참여)
+trips         ──(1:N)── sessions             (하나의 계획에 여러 대화 스레드)
+trips         ──(1:N)── trip_participants     (하나의 계획에 여러 참여자)
+trips         ──(1:N)── trip_days            (계획 안에 여러 일차)
+trips         ──(1:N)── trip_memos           (계획의 날짜별 자유 메모)
+trips         ──(1:N)── trip_map_markers     (계획의 지도 마커)
+trips         ──(1:N)── trip_files           (계획 첨부파일)
+trip_days     ──(1:N)── itinerary_items      (일차 안에 여러 일정 항목)
+itinerary_items ──(N:1)── places             (일정 항목이 DB 장소 참조)
+sessions      ──(1:N)── conversations        (세션 안에 여러 메시지)
+sessions      ──(1:N)── session_files        (세션 안에 업로드된 파일)
+places        ──(1:N)── place_hours          (장소 운영 시간)
+places        ──(1:N)── place_images         (장소 이미지)
+weather_snapshots ── trip_days (region + target_date JOIN으로 일정별 날씨 조회)

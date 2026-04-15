@@ -148,8 +148,10 @@ export const BackendHooks = {
     if (data.access_token && data.refresh_token) {
       TokenManager.setTokens(data.access_token, data.refresh_token);
       TokenManager.setUserInfo({
-        userId: data.user_id,
+        userId:   data.user_id,
         userType: data.type || 'MEM',
+        nickname: data.nickname,
+        email:    data.email,
       });
     }
     return data;
@@ -246,12 +248,24 @@ export const BackendHooks = {
   // 세션 API
   // --------------------------------------------------
 
-  async fetchSessionList(mode = 'personal') {
+  async fetchPlanList() {
     try {
-      const res = await this._authFetch(`/api/sessions?mode=${mode}`);
+      const res = await this._authFetch('/api/plans');
+      if (!res.ok) return [];
+      return await res.json();
+    } catch (error) {
+      console.error("API Error (fetchPlanList):", error);
+      return [];
+    }
+  },
+
+  async fetchSessionList(mode = 'personal', planId = null) {
+    try {
+      const params = new URLSearchParams({ mode });
+      if (planId) params.set('plan_id', planId);
+      const res = await this._authFetch(`/api/sessions?${params}`);
       if (!res.ok) return [];
       const data = await res.json();
-      // 백엔드가 {sessions: [...], mode, user_id} 형태로 반환
       return Array.isArray(data) ? data : (data.sessions || []);
     } catch (error) {
       console.error("API Error (fetchSessionList):", error);
@@ -259,12 +273,14 @@ export const BackendHooks = {
     }
   },
 
-  async createSession(firstMessage, mode = 'personal') {
+  async createSession(firstMessage, mode = 'personal', planId = null) {
     try {
+      const body = { first_message: firstMessage, mode };
+      if (planId) body.plan_id = planId;
       const res = await this._authFetch('/api/sessions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ first_message: firstMessage, mode }),
+        body: JSON.stringify(body),
       });
       return await res.json();
     } catch (error) {

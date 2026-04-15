@@ -515,6 +515,7 @@ function bindAccountMgmtEvents(container) {
       onConfirm: async () => {
         try {
           await BackendHooks.logoutAllDevices();
+          document.dispatchEvent(new CustomEvent('ta:logout'));
           alert('모든 기기에서 로그아웃되었습니다.');
         } catch {
           alert('처리에 실패했습니다. 잠시 후 다시 시도해주세요.');
@@ -714,6 +715,7 @@ function renderLoggedInView(container) {
     e.target.disabled = true;
     e.target.textContent = '로그아웃 중...';
     await BackendHooks.logout();
+    document.dispatchEvent(new CustomEvent('ta:logout'));
     renderLoginView(container);
   });
 
@@ -769,7 +771,8 @@ function renderLoginView(container) {
       }
       const profile = await BackendHooks.getMyProfile();
       if (profile) TokenManager.setUserInfo({ nickname: profile.nickname || '', email: profile.email || '' });
-      renderLoggedInView(container);
+      // 로그인 완료 → 홈으로 이동 (계획 카드 노출)
+      window.location.hash = '#/';
     } catch (err) {
       if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = '로그인'; }
       alert(err.detail || '로그인에 실패했습니다.');
@@ -786,7 +789,7 @@ function renderLoginView(container) {
     e.target.textContent = '연결 중...';
     try {
       await BackendHooks.guestLogin();
-      renderLoggedInView(container);
+      window.location.hash = '#/';
     } catch {
       e.target.disabled = false;
       e.target.textContent = '게스트로 계속하기';
@@ -813,7 +816,7 @@ function renderLoginView(container) {
         await BackendHooks.login(email, pw);
         const profile = await BackendHooks.getMyProfile();
         if (profile) TokenManager.setUserInfo({ nickname: profile.nickname || '', email: profile.email || '' });
-        renderLoggedInView(container);
+        window.location.hash = '#/';
       } catch {
         renderLoginView(container);
         alert('회원가입 완료! 이제 로그인해주세요.');

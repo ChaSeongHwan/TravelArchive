@@ -73,6 +73,11 @@
     opacity: 0.1;
   }
 
+  /* 태블릿: content padding 조정 */
+  .content {
+    padding: 0 32px;
+  }
+
   .sidebar-title {
     font-size: 24px;
   }
@@ -118,6 +123,11 @@
     height: calc(100dvh - 24px);
     position: relative;
     overflow: hidden;
+  }
+
+  /* 모바일에서 content 좌우 여백 축소: 카드 및 채팅 레이아웃 공간 확보 */
+  .content {
+    padding: 0 16px;
   }
 
   .light-1 {
@@ -279,25 +289,29 @@
     margin-right: clamp(10px, 4vw, 18px);
   }
 
+  /* 모바일: content padding 줄이기 */
+  .content {
+    padding: 0 clamp(12px, 2vw, 20px);
+  }
+
   .hero {
-    margin-bottom: 80px;
-    padding: 0 16px;
-  }
-
-  .hero h1 {
-    font-size: 36px;
-    letter-spacing: -0.03em;
-  }
-
-  .hero p {
-    font-size: 15px;
-    line-height: 1.7;
-    margin-top: 16px;
+    margin-bottom: 0;
+    padding: 0;
+    justify-content: center;
+    gap: 0;
+    min-height: auto;
   }
 
   .hero-label {
-    font-size: 11px;
-    letter-spacing: 0.3em;
+    display: none;
+  }
+
+  .hero h1 {
+    display: none;
+  }
+
+  .hero p {
+    display: none;
   }
 
   .page-section {
@@ -444,6 +458,11 @@
     height: calc(100dvh - 16px);
   }
 
+  /* 소형 모바일에서 content 여백 추가 축소 */
+  .content {
+    padding: 0 8px;
+  }
+
   .hero h1 {
     font-size: 28px;
   }
@@ -514,7 +533,8 @@
   }
 
   .hero {
-    margin-bottom: 60px;
+    margin-bottom: 0;
+    padding-top: clamp(12px, 2vh, 24px);
   }
 
   .hero h1 {

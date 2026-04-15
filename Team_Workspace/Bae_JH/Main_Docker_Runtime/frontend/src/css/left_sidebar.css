@@ -80,11 +80,113 @@
   color: rgba(17, 24, 39, 0.90);
 }
 
+/* ==========================================================
+   PLAN FILTER DROPDOWN
+   ========================================================== */
+
+.plan-filter {
+  position: relative;
+  margin-top: 14px;
+  width: 100%;
+}
+
+.plan-filter-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  background: rgba(255, 255, 255, 0.38);
+  color: rgba(17, 24, 39, 0.78);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.18s, border-color 0.18s;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.plan-filter-trigger:hover {
+  background: rgba(255, 255, 255, 0.50);
+  color: rgba(17, 24, 39, 0.95);
+}
+
+.plan-filter-label {
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.plan-filter-chevron {
+  flex-shrink: 0;
+  opacity: 0.5;
+  transition: transform 0.2s ease;
+}
+
+.plan-filter-menu.open + .plan-filter-trigger .plan-filter-chevron,
+.plan-filter-trigger[aria-expanded="true"] .plan-filter-chevron {
+  transform: rotate(180deg);
+}
+
+.plan-filter-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  right: 0;
+  z-index: 200;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 14px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  animation: planMenuIn 0.18s ease both;
+}
+
+.plan-filter-menu.open {
+  display: flex;
+}
+
+@keyframes planMenuIn {
+  from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.plan-filter-item {
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(17, 24, 39, 0.72);
+  cursor: pointer;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  transition: background 0.12s;
+}
+
+.plan-filter-item:last-child { border-bottom: none; }
+
+.plan-filter-item:hover {
+  background: rgba(59, 130, 246, 0.07);
+  color: #111827;
+}
+
+.plan-filter-item.active {
+  color: #2563eb;
+  font-weight: 700;
+  background: rgba(59, 130, 246, 0.06);
+}
+
 /* Sidebar Tabs */
 .sidebar-tabs {
   display: flex;
   gap: 10px;
-  margin-top: 18px;
+  margin-top: 12px;
   margin-bottom: 4px;
   width: 100%;
   box-sizing: border-box;

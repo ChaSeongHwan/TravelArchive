@@ -70,6 +70,7 @@ class LogoutRequest(BaseModel):
 class SessionCreateRequest(BaseModel):
     first_message: str
     mode: str = "personal"
+    plan_id: Optional[str] = None
 
 class SessionModeUpdateRequest(BaseModel):
     mode: str
@@ -104,6 +105,32 @@ class PlanRequest(BaseModel):
 class TripRangeRequest(BaseModel):
     ranges: List[Dict]
 
+class UserProfileRequest(BaseModel):
+    nickname: Optional[str] = None
+    bio: Optional[str] = None
+    email1: Optional[str] = None
+    extra_contacts: Optional[List[str]] = None
+
+class UserStyleRequest(BaseModel):
+    characteristics: Optional[List[str]] = None
+    emoji_usage: Optional[str] = None
+    header_usage: Optional[str] = None
+    custom_instructions: Optional[str] = None
+    additional_info: Optional[str] = None
+
+class UserTravelRequest(BaseModel):
+    styles: Optional[List[str]] = None
+    pace: Optional[str] = None
+    accommodations: Optional[List[str]] = None
+    food_prefs: Optional[List[str]] = None
+    allergies: Optional[List[str]] = None
+    max_distance: Optional[int] = None
+    distance_unit: Optional[str] = None
+    weather_crowd: Optional[bool] = None
+    pet_friendly: Optional[bool] = None
+    disabilities: Optional[List[str]] = None
+    disability_other: Optional[str] = None
+
 
 # ============================================================
 # 인증 API  →  Loader
@@ -131,6 +158,14 @@ async def logout(req: LogoutRequest, request: Request):
     await Loader.logout(request.app.state.redis, req.refresh_token)
     return {"status": "success", "message": "로그아웃 되었습니다"}
 
+@app.post("/api/auth/logout/all")
+async def logout_all_devices(req: LogoutRequest, request: Request,
+                              user_id: str = Depends(get_current_user)):
+    # TODO: 해당 user_id의 모든 refresh token 무효화
+    await Loader.logout(request.app.state.redis, req.refresh_token)
+    print(f"[Facade] {user_id} 전체 기기 로그아웃 (mock: 현재 토큰만 삭제)")
+    return {"status": "success", "message": "모든 기기에서 로그아웃되었습니다"}
+
 @app.post("/api/auth/social/{provider}")
 async def social_login(provider: str):
     return {"status": "not_implemented", "provider": provider}
@@ -138,6 +173,12 @@ async def social_login(provider: str):
 @app.post("/api/auth/find")
 async def find_account():
     return {"status": "not_implemented"}
+
+@app.post("/api/auth/social/link/{provider}")
+async def link_social_account(provider: str, user_id: str = Depends(get_current_user)):
+    # TODO: OAuth 플로우 연동
+    print(f"[Facade] {user_id} SNS 연동 요청: {provider}")
+    return {"status": "not_implemented", "message": f"{provider} 연동은 준비 중입니다."}
 
 @app.get("/api/auth/me")
 async def get_my_info(request: Request, user_id: str = Depends(get_current_user)):
@@ -151,6 +192,34 @@ async def get_my_info(request: Request, user_id: str = Depends(get_current_user)
 @app.get("/api/account")
 async def get_account_info(request: Request, user_id: str = Depends(get_optional_user)):
     return await Loader.get_account_info(request.app.state.postgres, user_id)
+
+@app.put("/api/user/profile")
+async def save_user_profile(req: UserProfileRequest,
+                             user_id: str = Depends(get_current_user)):
+    # TODO: DB에 프로필 저장
+    print(f"[Facade] {user_id} 프로필 저장: {req.model_dump(exclude_none=True)}")
+    return {"status": "success"}
+
+@app.put("/api/user/style")
+async def save_user_style(req: UserStyleRequest,
+                           user_id: str = Depends(get_current_user)):
+    # TODO: DB에 AI 스타일 저장
+    print(f"[Facade] {user_id} AI 스타일 저장: {req.model_dump(exclude_none=True)}")
+    return {"status": "success"}
+
+@app.put("/api/user/travel")
+async def save_travel_preferences(req: UserTravelRequest,
+                                   user_id: str = Depends(get_current_user)):
+    # TODO: DB에 여행 스타일 저장
+    print(f"[Facade] {user_id} 여행 스타일 저장: {req.model_dump(exclude_none=True)}")
+    return {"status": "success"}
+
+@app.delete("/api/user/account")
+async def delete_account(request: Request, user_id: str = Depends(get_current_user)):
+    # TODO: DB에서 계정 및 관련 데이터 전체 삭제
+    print(f"[Facade] {user_id} 계정 삭제 요청 (mock)")
+    return {"status": "success", "message": "계정이 삭제되었습니다"}
+
 
 @app.get("/api/context")
 async def get_app_context():
@@ -196,16 +265,26 @@ async def get_weather():
 
 
 # ============================================================
+# 계획 API  →  Router
+# ============================================================
+
+@app.get("/api/plans")
+async def get_plan_list(user_id: str = Depends(get_current_user)):
+    return await Router.get_plan_list(user_id)
+
+
+# ============================================================
 # 세션 관리 API  →  Router
 # ============================================================
 
 @app.get("/api/sessions")
-async def get_session_list(mode: str = "personal", user_id: str = Depends(get_current_user)):
-    return await Router.get_session_list(mode, user_id)
+async def get_session_list(mode: str = "personal", plan_id: Optional[str] = None,
+                            user_id: str = Depends(get_current_user)):
+    return await Router.get_session_list(mode, plan_id, user_id)
 
 @app.post("/api/sessions")
 async def create_session(req: SessionCreateRequest, user_id: str = Depends(get_current_user)):
-    return await Router.create_session(req.first_message, req.mode, user_id)
+    return await Router.create_session(req.first_message, req.mode, user_id, req.plan_id)
 
 @app.delete("/api/sessions/{session_id}")
 async def delete_session(session_id: str, user_id: str = Depends(get_current_user)):

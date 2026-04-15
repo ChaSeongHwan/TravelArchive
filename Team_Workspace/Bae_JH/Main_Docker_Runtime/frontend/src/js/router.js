@@ -5,36 +5,37 @@
 import { renderSettingsPage } from './settings.js';
 import { renderAccountPage } from './account.js';
 import { renderHelpPage } from './help.js';
-import { BackendHooks } from './api.js';
+import { BackendHooks, TokenManager } from './api.js';
+import { HomeManager } from './home.js';
 import { SidebarManager } from './sidebar.js';
 import { CalendarManager } from './calendar.js';
 import { showLoadingIndicator, removeLoadingIndicator, appendMessage, adjustTextareaHeight } from './ui.js';
 
 const PAGES = {
   '#/settings': { type: 'page', renderer: renderSettingsPage },
-  '#/account': { type: 'page', renderer: renderAccountPage },
-  '#/help': { type: 'page', renderer: renderHelpPage },
-  '#/': { type: 'home' }
+  '#/account':  { type: 'page', renderer: renderAccountPage },
+  '#/help':     { type: 'page', renderer: renderHelpPage },
+  '#/':         { type: 'home' }
 };
 
 export function switchView(viewName, elements) {
-  const { 
-    heroSection, 
-    chatHistory, 
-    chatWrap, 
-    pageSection, 
+  const {
+    heroSection,
+    chatHistory,
+    chatWrap,
+    pageSection,
     topBarActions,
     downloadChatBtn,
     shareChatBtn,
     mapToggleBtn
   } = elements;
-  
-  // Reset all to none
+
+  // 모두 초기화
   heroSection.style.display = 'none';
   chatHistory.style.display = 'none';
   chatWrap.style.display = 'none';
   pageSection.style.display = 'none';
-  
+
   topBarActions.style.display = 'flex';
 
   switch (viewName) {
@@ -42,22 +43,21 @@ export function switchView(viewName, elements) {
       heroSection.style.display = 'flex';
       chatWrap.style.display = 'block';
       if (downloadChatBtn) downloadChatBtn.style.display = 'none';
-      if (shareChatBtn) shareChatBtn.style.display = 'none';
-      if (mapToggleBtn) mapToggleBtn.style.display = 'none'; // Fix Item 12: Ensure hidden on home
+      if (shareChatBtn)    shareChatBtn.style.display = 'none';
+      if (mapToggleBtn)    mapToggleBtn.style.display = 'none';
       break;
     case 'chat':
       chatHistory.style.display = 'flex';
       chatWrap.style.display = 'block';
       if (downloadChatBtn) downloadChatBtn.style.display = 'flex';
-      if (shareChatBtn) shareChatBtn.style.display = 'flex';
-      if (mapToggleBtn) mapToggleBtn.style.display = 'flex'; // Fix Item 12: Only show on chat
+      if (shareChatBtn)    shareChatBtn.style.display = 'flex';
+      if (mapToggleBtn)    mapToggleBtn.style.display = 'flex';
       break;
     case 'page':
       pageSection.style.display = 'flex';
-      chatWrap.style.display = 'none'; // Fix Item 6: Ensure hidden on pages
       if (downloadChatBtn) downloadChatBtn.style.display = 'none';
-      if (shareChatBtn) shareChatBtn.style.display = 'none';
-      if (mapToggleBtn) mapToggleBtn.style.display = 'none'; // Fix Item 12: Ensure hidden on pages
+      if (shareChatBtn)    shareChatBtn.style.display = 'none';
+      if (mapToggleBtn)    mapToggleBtn.style.display = 'none';
       break;
   }
 }
@@ -73,8 +73,7 @@ export async function router(state, elements) {
       chatHistory.innerHTML = '';
       const loadingId = showLoadingIndicator(chatHistory);
       state.currentSessionId = ssid;
-      
-      // Refresh date-specific data
+
       CalendarManager.loadTripRange(ssid);
       SidebarManager.initMemoRows(elements);
       SidebarManager.initScheduleRows(elements);
@@ -98,16 +97,28 @@ export async function router(state, elements) {
   const page = PAGES[path] || PAGES['#/'];
   state.currentSessionId = null;
 
-  // Refresh date-specific data
   CalendarManager.loadTripRange(null);
   SidebarManager.initMemoRows(elements);
   SidebarManager.initScheduleRows(elements);
 
   if (page.type === 'home') {
-    switchView('home', elements);
     chatHistory.innerHTML = '';
     chatInput.value = '';
     adjustTextareaHeight(chatInput, chatBox);
+    switchView('home', elements);
+
+    // homeDashboard는 heroSection 내부에 있으므로 hero와 함께 show/hide됨
+    if (elements.homeDashboard) {
+      if (TokenManager.isLoggedIn()) {
+        elements.homeDashboard.style.display = 'block';
+        elements.heroSection?.classList.add('dashboard-active');
+        HomeManager.render(elements.homeDashboard, elements._onNewSession || (() => {}));
+        elements._refreshSessions?.();
+      } else {
+        elements.homeDashboard.style.display = 'none';
+        elements.heroSection?.classList.remove('dashboard-active');
+      }
+    }
   } else if (page.type === 'page') {
     switchView('page', elements);
     pageSection.innerHTML = '';
