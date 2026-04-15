@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Travel Archive - Map</title>
+
+  <!-- 기본 지도 스타일 -->
+  <link rel="stylesheet" href="/css/map.css">
+
+  <!-- 오버레이 컨트롤 패널 (mapOverlayControls.js) -->
+  <link rel="stylesheet" href="/css/overlay.css">
+
+  <!-- 마커 장소 정보 패널 (mapMarkerInfo.js) -->
+  <link rel="stylesheet" href="/css/markerInfo.css">
+
+  <style>
+    /*
+     * #map-wrapper: 지도와 정보 패널을 세로로 쌓는 플렉스 컨테이너.
+     * - #map       : 남은 공간 모두 차지
+     * - #mi-panel  : 자신의 콘텐츠 높이만큼만 차지 (펼칠 때 push-down)
+     *
+     * map.css 에서 html/body/에 height:100% 가 있다면 그대로 유지하고,
+     * #map 의 height 설정은 아래 flex:1 로 대체합니다.
+     */
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;          /* 패널 펼칠 때 스크롤바 방지 */
+    }
+
+    #map-wrapper {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+    }
+
+    /*
+     * Kakao 지도는 컨테이너의 렌더 크기를 읽으므로
+     * flex:1 + min-height:0 으로 남은 공간을 채우면 정상 동작합니다.
+     */
+    #map {
+      flex: 1;
+      min-height: 0;
+      position: relative;        /* 오버레이 패널 absolute 기준점 */
+    }
+  </style>
+</head>
+<body>
+  <!--
+    #map-wrapper
+    ├── #map            ← 카카오 지도 (오버레이 패널은 이 안에 absolute)
+    └── #mi-panel       ← 마커 정보 카드 (mapMarkerInfo.js 가 afterend 삽입)
+  -->
+  <div id="map-wrapper">
+    <div id="map"></div>
+  </div>
+
+  <script type="module" src="/js/map.js"></script>
+</body>
+</html>

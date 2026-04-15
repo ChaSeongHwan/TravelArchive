@@ -1,0 +1,389 @@
+/* ==========================================================
+   RIGHT SIDEBAR (오른쪽 사이드바 - 지도 영역)
+   ========================================================== */
+.right-sidebar {
+  position: relative;
+  width: 420px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 22px 18px;
+  border-left: 1px solid rgba(255, 255, 255, 0.20);
+  background: var(--sidebar-bg, rgba(255, 255, 255, 0.22));
+  backdrop-filter: blur(35px);
+  -webkit-backdrop-filter: blur(35px);
+  transition: width 0.3s ease, padding 0.3s ease, opacity 0.3s ease;
+  overflow: hidden !important;
+  border-bottom-right-radius: 32px;
+}
+
+.right-sidebar.collapsed {
+  width: 0 !important;
+  padding: 0 !important;
+  opacity: 0;
+  border-left: none;
+  border-bottom-right-radius: 0;
+}
+
+.right-sidebar-header {
+  padding: 0 10px;
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.right-sidebar-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: rgba(17, 24, 39, 0.90);
+  letter-spacing: 0.1em;
+}
+
+.close-right-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: rgba(17, 24, 39, 0.6);
+  padding: 6px;
+  border-radius: 8px;
+  transition: 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-right-btn:hover {
+  background: rgba(255, 255, 255, 0.4);
+  color: rgba(17, 24, 39, 1);
+}
+
+.right-sidebar-content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0 10px;
+}
+
+#kakaoMapContainer {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+  position: relative;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  /* margin-bottom 제거: rs-mi-panel 이 바로 아래 붙으므로 */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.right-sidebar.notransition {
+  transition: none !important;
+}
+
+/* 리사이저 */
+.right-sidebar-resizer {
+  position: absolute;
+  top: 0;
+  left: 0 !important;
+  width: 10px;
+  height: 100%;
+  cursor: col-resize;
+  background-color: transparent;
+  z-index: 99999;
+  transition: background-color 0.2s ease;
+}
+
+.right-sidebar-resizer:hover,
+.right-sidebar-resizer.active {
+  background-color: rgba(59, 130, 246, 0.5);
+}
+
+.map-drag-shield::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  background: transparent;
+}
+
+/* ==========================================================
+   MARKER INFO PANEL  (#rs-mi-panel)
+   rightSidebarMarkerPanel.js 가 #kakaoMapContainer 바로 아래에 삽입.
+
+   grid-template-rows: 0fr → 1fr 트릭으로 자연스러운 높이 애니메이션.
+   right-sidebar 의 overflow:hidden 로 인해 .right-sidebar-content
+   밖에 놓으면 잘릴 수 있으므로, 삽입 위치는 #kakaoMapContainer
+   의 afterend (right-sidebar-content 내부) 에 두어야 합니다.
+   ========================================================== */
+
+/* ── 래퍼: grid 높이 트릭 ────────────────────────────────── */
+#rs-mi-panel {
+  display: grid;
+  grid-template-rows: 0fr;        /* 닫힌 상태 */
+  transition: grid-template-rows .36s cubic-bezier(.22, 1, .36, 1);
+  overflow: hidden;
+  /* 지도와의 간격 */
+  margin-top: 16px;
+  border-radius: 14px;
+  background: rgba(10, 12, 20, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.30);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+#rs-mi-panel.rs-mi-open {
+  grid-template-rows: 1fr;        /* 열린 상태 */
+}
+
+/* ── 내부 클리핑 래퍼 ────────────────────────────────────── */
+.rs-mi-inner {
+  overflow: hidden;
+  min-height: 0;                  /* grid 트릭 필수 */
+}
+
+/* ── 카드 ─────────────────────────────────────────────────── */
+.rs-mi-card {
+  padding: 0;
+}
+
+/* ── 헤더 ─────────────────────────────────────────────────── */
+.rs-mi-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px 0;
+}
+
+.rs-mi-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.rs-mi-badge {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #60a5fa;
+  opacity: .85;
+  line-height: 1;
+}
+
+.rs-mi-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.92);
+  margin: 0;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── 닫기 버튼 ───────────────────────────────────────────── */
+.rs-mi-close {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.50);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  flex-shrink: 0;
+  transition: background .15s, color .15s, transform .12s;
+}
+
+.rs-mi-close svg {
+  width: 13px;
+  height: 13px;
+  pointer-events: none;
+}
+
+.rs-mi-close:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.92);
+  transform: scale(1.08);
+}
+
+.rs-mi-close:active {
+  transform: scale(.92);
+}
+
+/* ── 바디 ─────────────────────────────────────────────────── */
+.rs-mi-body {
+  padding: 10px 16px 0;
+}
+
+/* ── 스켈레톤 ─────────────────────────────────────────────── */
+.rs-mi-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 4px 0 6px;
+}
+
+.rs-mi-sk {
+  height: 11px;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, .06)  0%,
+    rgba(255, 255, 255, .13) 40%,
+    rgba(255, 255, 255, .06) 100%
+  );
+  background-size: 200% 100%;
+  animation: rs-mi-shimmer 1.4s infinite linear;
+}
+
+.rs-mi-sk-80 { width: 80%; }
+.rs-mi-sk-60 { width: 60%; }
+.rs-mi-sk-70 { width: 70%; }
+
+@keyframes rs-mi-shimmer {
+  0%   { background-position:  200% center; }
+  100% { background-position: -200% center; }
+}
+
+/* ── 정보 리스트 ──────────────────────────────────────────── */
+.rs-mi-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.rs-mi-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.rs-mi-item:last-child {
+  border-bottom: none;
+}
+
+.rs-mi-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.rs-mi-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.rs-mi-label {
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.28);
+  line-height: 1;
+}
+
+.rs-mi-value {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.4;
+  word-break: break-all;
+}
+
+.rs-mi-mono {
+  font-family: 'Fira Code', 'Courier New', monospace;
+  font-size: 11px;
+  color: rgba(96, 165, 250, 0.90);
+}
+
+/* ── 오류 ─────────────────────────────────────────────────── */
+.rs-mi-error {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.45);
+  text-align: center;
+  padding: 10px 0 6px;
+  margin: 0;
+}
+
+/* ── 푸터 ─────────────────────────────────────────────────── */
+.rs-mi-footer {
+  display: flex;
+  gap: 7px;
+  padding: 10px 16px 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  margin-top: 8px;
+}
+
+.rs-mi-action {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 32px;
+  border-radius: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s, color .15s, border-color .15s, transform .12s;
+}
+
+.rs-mi-action svg {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+}
+
+.rs-mi-action:hover {
+  background: rgba(255, 255, 255, 0.09);
+  color: rgba(255, 255, 255, 0.90);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.rs-mi-action:active {
+  transform: scale(.96);
+}
+
+.rs-mi-action--primary {
+  background: rgba(96, 165, 250, 0.14);
+  border-color: rgba(96, 165, 250, 0.35);
+  color: #93c5fd;
+}
+
+.rs-mi-action--primary:hover {
+  background: rgba(96, 165, 250, 0.22);
+  border-color: rgba(96, 165, 250, 0.50);
+  color: #bfdbfe;
+}
